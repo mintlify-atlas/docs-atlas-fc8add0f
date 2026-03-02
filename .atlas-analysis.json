@@ -1,0 +1,92 @@
+{
+  "projectType": "saas",
+  "projectName": "Marble",
+  "projectDescription": "A headless CMS for managing articles, product updates, and changelogs with a beautiful editor and REST API",
+  "theme": "mint",
+  "primaryColor": "#6366f1",
+  "lightColor": "#818cf8",
+  "darkColor": "#4f46e5",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Dashboard",
+            "pages": [
+              "dashboard/overview",
+              "dashboard/workspaces",
+              "dashboard/posts",
+              "dashboard/categories-and-tags",
+              "dashboard/authors",
+              "dashboard/media",
+              "dashboard/editor"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "advanced/api-keys",
+              "advanced/webhooks",
+              "advanced/analytics",
+              "advanced/self-hosting"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api/introduction",
+              "api/authentication",
+              "api/rate-limiting",
+              "api/errors"
+            ]
+          },
+          {
+            "group": "Endpoints",
+            "pages": [
+              "api/posts",
+              "api/categories",
+              "api/tags",
+              "api/authors",
+              "api/cache"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Rich text editor with Tiptap for creating and editing posts",
+    "Multi-tenant workspaces with role-based access control",
+    "REST API for fetching content programmatically",
+    "Content organization with categories, tags, and authors",
+    "Media management with Cloudflare R2 storage",
+    "Webhook delivery system for real-time notifications",
+    "API key management with scopes and rate limiting",
+    "Usage analytics and tracking"
+  ],
+  "publicApiSurface": [
+    "GET /v1/posts - List and fetch posts",
+    "GET /v1/posts/:slug - Get post by slug",
+    "GET /v1/categories - List categories",
+    "GET /v1/categories/:slug - Get category by slug",
+    "GET /v1/tags - List tags",
+    "GET /v1/tags/:slug - Get tag by slug",
+    "GET /v1/authors - List authors",
+    "GET /v1/authors/:slug - Get author by slug",
+    "POST /v1/cache/invalidate - Invalidate cache"
+  ]
+}
