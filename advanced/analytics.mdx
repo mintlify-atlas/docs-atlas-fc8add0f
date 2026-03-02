@@ -1,0 +1,326 @@
+---
+title: Analytics
+description: Track API usage, media uploads, and workspace activity
+---
+
+Marble provides built-in analytics to help you monitor API usage, track media uploads, and understand how your workspace is being used.
+
+## Usage tracking
+
+Marble automatically tracks usage events across your workspace to help you monitor activity and stay within plan limits.
+
+### Usage event types
+
+Marble tracks three types of usage events:
+
+<CardGroup cols={3}>
+  <Card title="API requests" icon="api">
+    Every API request made to your workspace is tracked, including the endpoint, method, and status code.
+  </Card>
+  <Card title="Media uploads" icon="image">
+    Media uploads are tracked with file size and type information.
+  </Card>
+  <Card title="Webhook deliveries" icon="webhook">
+    Webhook deliveries are logged to track outbound event notifications.
+  </Card>
+</CardGroup>
+
+### Viewing analytics
+
+Access your workspace analytics from the dashboard:
+
+1. Navigate to **Settings** > **Analytics**
+2. View usage metrics by time period
+3. Filter by event type, endpoint, or date range
+4. Export data for external analysis
+
+## API request analytics
+
+API request tracking provides detailed insights into how your API is being used.
+
+### Tracked metrics
+
+For each API request, Marble tracks:
+
+- **Timestamp** - When the request was made
+- **Endpoint** - The API endpoint that was called
+- **Method** - HTTP method (GET, POST, PUT, DELETE)
+- **Status code** - Response status (200, 404, 500, etc.)
+- **API key type** - Whether the request used a public or private key
+- **Workspace ID** - The workspace that made the request
+
+### Usage limits
+
+Marble enforces usage limits based on your subscription plan:
+
+<CodeGroup>
+```json Hobby plan
+{
+  "plan": "hobby",
+  "limits": {
+    "api_requests": 10000,
+    "media_storage": "1 GB",
+    "billing_period": "month"
+  }
+}
+```
+
+```json Pro plan
+{
+  "plan": "pro",
+  "limits": {
+    "api_requests": 100000,
+    "media_storage": "10 GB",
+    "billing_period": "month"
+  }
+}
+```
+</CodeGroup>
+
+### Usage threshold notifications
+
+Marble automatically sends email notifications when you approach your usage limits:
+
+- **75% threshold** - Warning that you're approaching your limit
+- **90% threshold** - Urgent warning that you're close to your limit
+- **100% threshold** - Notification that you've reached your limit
+
+<Warning>
+  When you exceed your API request limit, you'll receive `429 Too Many Requests` responses until your usage resets at the start of your next billing period.
+</Warning>
+
+## Media upload tracking
+
+Media uploads are tracked to monitor storage usage and file activity.
+
+### Tracked data
+
+For each media upload, Marble records:
+
+- **File name** - Original filename
+- **File size** - Size in bytes
+- **Media type** - image, video, audio, or document
+- **Upload timestamp** - When the file was uploaded
+- **User ID** - Who uploaded the file
+
+### Storage metrics
+
+View storage analytics in your dashboard:
+
+- Total storage used
+- Storage by media type (images, videos, documents)
+- Largest files
+- Recent uploads
+
+<Note>
+  Media storage is calculated based on the actual file sizes stored in Cloudflare R2. Deleted media is removed from your storage usage immediately.
+</Note>
+
+## Real-time analytics with Polar
+
+Marble integrates with Polar.sh for advanced usage analytics and billing.
+
+### Polar integration
+
+When configured, Marble sends usage events to Polar in real-time:
+
+```typescript
+// Event sent to Polar
+{
+  name: "api_request",
+  externalCustomerId: "user_123",
+  metadata: {
+    endpoint: "/v1/posts",
+    method: "GET",
+    status: 200,
+    apiKeyType: "public"
+  }
+}
+```
+
+This allows you to:
+
+- Track usage-based billing
+- Monitor customer activity
+- Analyze API usage patterns
+- Generate custom reports
+
+### Setting up Polar analytics
+
+To enable Polar integration:
+
+<Steps>
+  <Step title="Get Polar access token">
+    Create a Polar account and obtain an access token from your dashboard.
+  </Step>
+  
+  <Step title="Configure environment">
+    Set the `POLAR_ACCESS_TOKEN` environment variable in your API deployment.
+  </Step>
+  
+  <Step title="Verify events">
+    Check your Polar dashboard to confirm events are being received.
+  </Step>
+</Steps>
+
+## Redis caching for analytics
+
+Marble uses Upstash Redis to cache usage counts for fast limit checking.
+
+### How it works
+
+<Steps>
+  <Step title="Request arrives">
+    When an API request is received, Marble checks the cached usage count in Redis.
+  </Step>
+  
+  <Step title="Check limit">
+    The current usage is compared against the plan limit.
+  </Step>
+  
+  <Step title="Allow or reject">
+    If under the limit, the request proceeds. If over, a 429 error is returned.
+  </Step>
+  
+  <Step title="Update count">
+    After the request completes, the usage count is incremented in Redis and the database.
+  </Step>
+</Steps>
+
+### Cache strategy
+
+- Usage counts are cached with a TTL matching the billing period
+- Cache is refreshed from the database periodically
+- If Redis is unavailable, requests are allowed and usage is tracked in the database only
+
+## Querying usage data
+
+You can query usage events directly from the database for custom analytics:
+
+<CodeGroup>
+```sql API requests by endpoint
+SELECT 
+  endpoint,
+  COUNT(*) as request_count,
+  DATE(created_at) as date
+FROM usage_event
+WHERE 
+  workspace_id = 'your_workspace_id'
+  AND type = 'api_request'
+  AND created_at >= NOW() - INTERVAL '30 days'
+GROUP BY endpoint, DATE(created_at)
+ORDER BY request_count DESC;
+```
+
+```sql Media uploads by type
+SELECT 
+  type,
+  COUNT(*) as upload_count,
+  SUM(size) / 1024 / 1024 as total_mb
+FROM usage_event
+WHERE 
+  workspace_id = 'your_workspace_id'
+  AND type = 'media_upload'
+  AND created_at >= NOW() - INTERVAL '30 days'
+GROUP BY type;
+```
+
+```sql Daily usage trend
+SELECT 
+  DATE(created_at) as date,
+  type,
+  COUNT(*) as event_count
+FROM usage_event
+WHERE 
+  workspace_id = 'your_workspace_id'
+  AND created_at >= NOW() - INTERVAL '7 days'
+GROUP BY DATE(created_at), type
+ORDER BY date DESC;
+```
+</CodeGroup>
+
+## API key analytics
+
+Track usage per API key to understand which integrations are most active.
+
+### Per-key metrics
+
+For each API key, Marble tracks:
+
+- **Request count** - Total requests made with this key
+- **Last used** - Timestamp of the most recent request
+- **Last request** - Timestamp for rate limit window tracking
+
+### Viewing key usage
+
+In the API Keys settings, you can see:
+
+- Which keys are actively being used
+- Request count per key
+- When each key was last used
+- Keys that haven't been used recently (candidates for deletion)
+
+<Note>
+  Regularly review API key usage to identify and remove unused keys. This improves security by reducing the number of active credentials.
+</Note>
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Monitor usage regularly">
+    Check your analytics dashboard weekly to identify unusual patterns or approaching limits.
+  </Accordion>
+  
+  <Accordion title="Set up alerts">
+    Configure email notifications to alert you before reaching usage limits.
+  </Accordion>
+  
+  <Accordion title="Optimize API calls">
+    Use analytics to identify inefficient API usage patterns and optimize your integration.
+  </Accordion>
+  
+  <Accordion title="Track by environment">
+    Use different API keys for development and production to separate analytics by environment.
+  </Accordion>
+  
+  <Accordion title="Export data regularly">
+    Export analytics data for long-term storage and trend analysis beyond the dashboard retention period.
+  </Accordion>
+</AccordionGroup>
+
+## Rate limit analytics
+
+Understand how rate limits affect your API usage.
+
+### Rate limit events
+
+When a request is rate limited:
+
+- The response includes `X-RateLimit-*` headers
+- A 429 status code is returned
+- The event is logged in analytics
+
+### Analyzing rate limits
+
+Use analytics to:
+
+- Identify which endpoints are being rate limited
+- Determine if you need higher rate limits
+- Optimize request patterns to stay within limits
+- Detect potential abuse or misconfigured integrations
+
+<CodeGroup>
+```sql Rate limited requests
+SELECT 
+  endpoint,
+  COUNT(*) as rate_limited_count,
+  DATE(created_at) as date
+FROM usage_event
+WHERE 
+  workspace_id = 'your_workspace_id'
+  AND type = 'api_request'
+  AND status = 429
+GROUP BY endpoint, DATE(created_at)
+ORDER BY rate_limited_count DESC;
+```
+</CodeGroup>

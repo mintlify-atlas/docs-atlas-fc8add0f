@@ -1,0 +1,248 @@
+---
+title: Workspaces
+description: Multi-tenant workspace management, roles, team members, and invitations
+---
+
+Workspaces (also called organizations) allow you to manage multiple publications or projects from a single Marble account. Each workspace is completely isolated with its own content, team, settings, and billing.
+
+## What is a workspace?
+
+A workspace is an isolated environment that contains:
+
+- **Content** - Posts, categories, tags, and authors
+- **Media library** - Uploaded images, videos, and documents
+- **Team members** - Users with assigned roles and permissions
+- **API configuration** - API keys with scoped access
+- **Webhooks** - Event-driven integrations
+- **Billing** - Subscription and usage tracking
+
+<Info>
+  Think of workspaces as separate publications or projects. For example, you might have one workspace for your company blog and another for your documentation site.
+</Info>
+
+## Creating a workspace
+
+<Steps>
+  <Step title="Access workspace settings">
+    Click your profile in the sidebar, then select **Create workspace**.
+  </Step>
+  <Step title="Enter workspace details">
+    Provide a name, slug, and optional description for your workspace.
+    
+    - **Name** - Display name for your workspace (e.g., "Company Blog")
+    - **Slug** - URL-friendly identifier (e.g., "company-blog")
+    - **Description** - Optional details about the workspace
+  </Step>
+  <Step title="Configure settings">
+    Set your timezone and optionally upload a logo.
+  </Step>
+  <Step title="Create workspace">
+    Click **Create** to set up your new workspace.
+  </Step>
+</Steps>
+
+<Note>
+  The slug must be unique across all Marble workspaces and cannot be changed after creation.
+</Note>
+
+## Workspace settings
+
+### General settings
+
+Configure basic workspace information:
+
+- **Name** - Update your workspace display name
+- **Subdomain** - Custom subdomain for content delivery (optional)
+- **Logo** - Workspace branding
+- **Description** - Brief description of the workspace
+- **Timezone** - Default timezone for publishing and scheduling
+
+### Appearance
+
+Customize the workspace appearance for your team.
+
+### Editor preferences
+
+Configure workspace-level editor settings:
+
+<Accordion title="AI assistance">
+  Enable AI-powered features in the editor to help with content creation:
+  
+  - Smart suggestions
+  - Content improvements
+  - Readability analysis
+  
+  <Warning>
+    AI features require additional configuration and may incur additional costs.
+  </Warning>
+</Accordion>
+
+## Team members
+
+Workspaces support collaboration with role-based access control.
+
+### User roles
+
+Marble has three built-in roles:
+
+<Tabs>
+  <Tab title="Owner">
+    Full control over the workspace:
+    
+    - Manage all content and settings
+    - Invite and remove team members
+    - Assign roles to members
+    - Delete the workspace
+    - Access billing and subscription
+    
+    <Note>
+      Each workspace has exactly one owner. Ownership can be transferred to another member.
+    </Note>
+  </Tab>
+  <Tab title="Admin">
+    Administrative access to most features:
+    
+    - Create, edit, and delete posts
+    - Manage categories, tags, and authors
+    - Upload and manage media
+    - Invite team members (cannot change roles)
+    - Configure webhooks and API keys
+    
+    Cannot access billing or delete the workspace.
+  </Tab>
+  <Tab title="Member">
+    Basic content creation access:
+    
+    - Create and edit their own posts
+    - Upload media
+    - View categories, tags, and authors
+    
+    Cannot manage team members, webhooks, or API keys.
+  </Tab>
+</Tabs>
+
+### Inviting team members
+
+<Steps>
+  <Step title="Navigate to team settings">
+    Go to **Settings** > **Members** in your workspace.
+  </Step>
+  <Step title="Click invite button">
+    Click **Invite member** to open the invitation form.
+  </Step>
+  <Step title="Enter email and role">
+    Provide the team member's email address and select their role (Admin or Member).
+  </Step>
+  <Step title="Send invitation">
+    Click **Send invitation**. The recipient will receive an email with instructions to join.
+  </Step>
+</Steps>
+
+<Info>
+  Invited users must have a Marble account. If they don't have one, they'll be prompted to sign up.
+</Info>
+
+### Managing invitations
+
+Pending invitations are displayed in the **Invitations** section. You can:
+
+- **Resend** - Send the invitation email again
+- **Revoke** - Cancel the invitation before it's accepted
+- **View status** - See pending, accepted, or expired invitations
+
+Invitations expire after 7 days and must be resent if not accepted.
+
+### Removing team members
+
+<Steps>
+  <Step title="Navigate to members list">
+    Go to **Settings** > **Members**.
+  </Step>
+  <Step title="Find the member">
+    Locate the team member you want to remove.
+  </Step>
+  <Step title="Remove member">
+    Click the menu icon (⋯) next to their name and select **Remove member**.
+  </Step>
+  <Step title="Confirm removal">
+    Confirm the action. The member will immediately lose access to the workspace.
+  </Step>
+</Steps>
+
+<Warning>
+  Removing a team member does not delete their content. Posts they created remain in the workspace.
+</Warning>
+
+## Leaving a workspace
+
+If you're a team member (not the owner), you can leave a workspace:
+
+<Steps>
+  <Step title="Access team settings">
+    Go to **Settings** > **Members**.
+  </Step>
+  <Step title="Click leave workspace">
+    Click **Leave workspace** at the bottom of the page.
+  </Step>
+  <Step title="Confirm departure">
+    Confirm that you want to leave. You'll lose access immediately.
+  </Step>
+</Steps>
+
+<Note>
+  Workspace owners cannot leave their workspace. You must transfer ownership to another member first.
+</Note>
+
+## Switching workspaces
+
+If you belong to multiple workspaces:
+
+1. Click the workspace name in the sidebar
+2. Select the workspace you want to switch to
+3. The dashboard will reload with the selected workspace's content
+
+Your active workspace is persisted across sessions.
+
+## Deleting a workspace
+
+<Warning>
+  Deleting a workspace is permanent and cannot be undone. All content, media, and settings will be permanently deleted.
+</Warning>
+
+Only workspace owners can delete a workspace:
+
+<Steps>
+  <Step title="Navigate to general settings">
+    Go to **Settings** > **General**.
+  </Step>
+  <Step title="Scroll to danger zone">
+    Find the **Delete workspace** section at the bottom.
+  </Step>
+  <Step title="Confirm deletion">
+    Enter the workspace name to confirm and click **Delete workspace**.
+  </Step>
+</Steps>
+
+Before deletion, Marble will:
+
+- Remove all team members
+- Cancel active subscriptions
+- Delete all content and media
+- Revoke all API keys
+- Remove all webhooks
+
+## Workspace limits
+
+Workspace limits depend on your plan:
+
+| Feature | Hobby Plan | Pro Plan |
+|---------|------------|----------|
+| Workspaces | 1 | Unlimited |
+| Team members | Owner only | Unlimited |
+| API requests | 100,000/month | 1,000,000/month |
+| Media storage | 1 GB | 100 GB |
+| Webhooks | 3 | Unlimited |
+
+<Info>
+  Upgrade to the Pro plan to unlock multi-workspace support and team collaboration. Try it free for 3 days.
+</Info>

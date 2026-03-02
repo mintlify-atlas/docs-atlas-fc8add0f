@@ -1,0 +1,392 @@
+---
+title: Media library
+description: Media library, uploading images/videos/documents, and Cloudflare R2 integration
+---
+
+The media library in Marble helps you organize and manage all files used across your content. Images, videos, and documents are stored securely using Cloudflare R2 for fast, global delivery.
+
+## Uploading media
+
+There are several ways to add files to your media library:
+
+### Direct upload
+
+<Steps>
+  <Step title="Navigate to media">
+    Click **Media** in the sidebar to view your media library.
+  </Step>
+  <Step title="Click upload button">
+    Click **Upload** in the toolbar or drag files directly into the browser window.
+  </Step>
+  <Step title="Select files">
+    Choose one or more files from your computer. You can upload multiple files at once.
+  </Step>
+  <Step title="Wait for upload">
+    Files are uploaded to Cloudflare R2 and processed. Progress is shown for each file.
+  </Step>
+</Steps>
+
+### Upload from editor
+
+While writing a post, you can upload media directly:
+
+<Tabs>
+  <Tab title="Image upload">
+    - Type `/image` and press Enter, or
+    - Click the image button in the toolbar, or
+    - Paste an image from clipboard, or
+    - Drag and drop an image into the editor
+    
+    The image is automatically uploaded and inserted into your content.
+  </Tab>
+  <Tab title="Video upload">
+    - Type `/video` and press Enter, or
+    - Click the video button in the toolbar, or
+    - Drag and drop a video into the editor
+    
+    The video is uploaded and embedded in your post.
+  </Tab>
+  <Tab title="Media library">
+    When inserting images or videos, click **Browse library** to select from previously uploaded files instead of uploading new ones.
+  </Tab>
+</Tabs>
+
+<Info>
+  Files uploaded through the editor are automatically added to the media library and can be reused in other posts.
+</Info>
+
+### Drag and drop
+
+The fastest way to upload multiple files:
+
+1. Open the Media page
+2. Drag files from your desktop or file manager
+3. Drop them anywhere on the page
+4. Files are uploaded automatically
+
+## Supported file types
+
+Marble supports four media types:
+
+<Tabs>
+  <Tab title="Images">
+    **Formats:** JPG, JPEG, PNG, WebP, GIF, SVG
+    
+    **Max size:** 10 MB per file
+    
+    **Use cases:**
+    - Cover images for posts
+    - Inline illustrations
+    - Screenshots and diagrams
+    - Profile photos
+    
+    <Note>
+      Images are not automatically optimized. Upload web-optimized images for best performance.
+    </Note>
+  </Tab>
+  <Tab title="Videos">
+    **Formats:** MP4, WebM, OGG, MOV
+    
+    **Max size:** 100 MB per file
+    
+    **Use cases:**
+    - Tutorial videos
+    - Product demos
+    - Embedded content
+    
+    <Info>
+      For large videos or better streaming, consider using YouTube or Vimeo embeds instead of direct uploads.
+    </Info>
+  </Tab>
+  <Tab title="Audio">
+    **Formats:** MP3, WAV, OGG, M4A
+    
+    **Max size:** 50 MB per file
+    
+    **Use cases:**
+    - Podcast episodes
+    - Audio clips
+    - Voice recordings
+  </Tab>
+  <Tab title="Documents">
+    **Formats:** PDF, DOC, DOCX, TXT, MD
+    
+    **Max size:** 25 MB per file
+    
+    **Use cases:**
+    - Downloadable resources
+    - Whitepapers
+    - Documentation files
+  </Tab>
+</Tabs>
+
+## Cloudflare R2 integration
+
+Marble uses Cloudflare R2 for media storage, providing:
+
+- **Global CDN** - Fast delivery from edge locations worldwide
+- **Zero egress fees** - No bandwidth charges for serving media
+- **S3-compatible API** - Industry-standard storage interface
+- **High durability** - 99.999999999% durability guarantee
+
+### How it works
+
+<Steps>
+  <Step title="Upload request">
+    When you upload a file, Marble generates a unique filename and uploads it to your R2 bucket.
+  </Step>
+  <Step title="Storage">
+    The file is stored in Cloudflare's distributed storage system.
+  </Step>
+  <Step title="Database record">
+    Marble creates a media record in the database with the file's URL, size, type, and metadata.
+  </Step>
+  <Step title="Public access">
+    The file is accessible via a public URL through Cloudflare's CDN.
+  </Step>
+</Steps>
+
+<Info>
+  All media files are publicly accessible via their URLs. Don't upload sensitive or private files.
+</Info>
+
+## Managing media
+
+### Viewing media
+
+The media library displays all your files in a grid layout. You can:
+
+- **Preview** - Click any file to see a larger preview
+- **Filter by type** - Show only images, videos, audio, or documents
+- **Sort** - Order by upload date (newest/oldest) or file name (A-Z/Z-A)
+- **Search** - Find files by name
+
+### Media details
+
+Click a file to view its details:
+
+- **Name** - Original filename
+- **URL** - Public CDN URL
+- **Type** - Image, video, audio, or document
+- **Size** - File size in KB/MB
+- **Alt text** - Accessibility description (images only)
+- **Upload date** - When the file was added
+
+### Editing media
+
+You can edit media properties:
+
+<Steps>
+  <Step title="Click the file">
+    Select the media item you want to edit.
+  </Step>
+  <Step title="Click edit button">
+    Click the edit icon in the preview.
+  </Step>
+  <Step title="Update properties">
+    Modify editable fields:
+    
+    - **Name** - Rename the file (doesn't change the URL)
+    - **Alt text** - Add or update accessibility text for images
+  </Step>
+  <Step title="Save changes">
+    Click **Update** to save.
+  </Step>
+</Steps>
+
+<Note>
+  Changing the media name doesn't change its URL. The URL remains constant to prevent broken links.
+</Note>
+
+### Copying URLs
+
+To use media outside of posts:
+
+1. Click the media file
+2. Click **Copy URL** in the preview
+3. Paste the URL wherever needed
+
+Media URLs follow this format:
+```
+https://your-bucket.r2.dev/workspace-id/filename.ext
+```
+
+### Deleting media
+
+<Warning>
+  Deleting media removes it from Cloudflare R2 and your library. Posts using the file will show broken images/videos.
+</Warning>
+
+<Steps>
+  <Step title="Select files">
+    Click the checkbox on one or more media files.
+  </Step>
+  <Step title="Click delete">
+    Click the **Delete** button in the toolbar.
+  </Step>
+  <Step title="Confirm deletion">
+    Confirm the action. Files are permanently removed from R2 and the database.
+  </Step>
+</Steps>
+
+Before deleting:
+
+- Check if the file is used in any posts
+- Consider keeping frequently-used assets
+- Back up important files externally
+
+## Bulk operations
+
+Perform actions on multiple files at once:
+
+### Selecting files
+
+- **Select individual files** - Click checkboxes on specific files
+- **Select all** - Click **Select all** to choose all visible files
+- **Deselect all** - Click **Deselect all** to clear selection
+
+### Bulk delete
+
+1. Select multiple files using checkboxes
+2. Click **Delete selected** in the toolbar
+3. Confirm the deletion
+4. All selected files are removed
+
+<Info>
+  You can select and delete up to 100 files at once.
+</Info>
+
+## Usage and limits
+
+Media storage is tracked as part of your workspace usage:
+
+### Storage quotas
+
+| Plan | Storage Limit | Upload Size |
+|------|---------------|-------------|
+| Hobby | 1 GB | 10 MB per file |
+| Pro | 100 GB | 100 MB per file |
+
+<Warning>
+  Exceeding your storage limit prevents new uploads. Delete unused files or upgrade your plan.
+</Warning>
+
+### Checking usage
+
+View your current storage usage:
+
+1. Go to **Settings** > **Billing**
+2. Check the **Media storage** metric
+3. See total storage used and percentage of quota
+
+### Usage events
+
+Media uploads are tracked for billing and analytics:
+
+- Each upload creates a `media_upload` usage event
+- Events include file size and type
+- View usage history in **Settings** > **Billing** > **Usage**
+
+## Best practices
+
+<Accordion title="Optimize images before upload">
+  Compress and resize images to web-appropriate dimensions before uploading. This saves storage space and improves page load times.
+  
+  Recommended tools:
+  - TinyPNG for compression
+  - ImageOptim for batch optimization
+  - Squoosh for format conversion
+</Accordion>
+
+<Accordion title="Use descriptive filenames">
+  Name files clearly before uploading:
+  - ✅ `product-screenshot-dashboard.png`
+  - ❌ `Screenshot 2024-03-15.png`
+  
+  This makes files easier to find in the media library.
+</Accordion>
+
+<Accordion title="Add alt text to images">
+  Always provide alt text for accessibility:
+  - Describe what the image shows
+  - Keep it concise (under 125 characters)
+  - Don't include "image of" or "photo of"
+  
+  Example: "Dashboard showing post analytics with view count graph"
+</Accordion>
+
+<Accordion title="Delete unused files regularly">
+  Periodically review and remove:
+  - Test uploads
+  - Duplicate files
+  - Outdated screenshots
+  - Files from deleted posts
+  
+  This keeps your library organized and prevents wasted storage.
+</Accordion>
+
+<Accordion title="Use external hosting for large videos">
+  For videos over 50 MB, use YouTube or Vimeo:
+  - Better streaming performance
+  - No storage quota impact
+  - Built-in player features
+  
+  Embed external videos using the editor's YouTube/Vimeo blocks.
+</Accordion>
+
+<Accordion title="Organize with consistent naming">
+  Develop a naming convention:
+  - `[category]-[description]-[date].[ext]`
+  - Example: `tutorial-setup-guide-2024-03.png`
+  
+  This makes filtering and searching more effective.
+</Accordion>
+
+## Media in the API
+
+Access media programmatically via the REST API:
+
+### Fetching media
+
+```bash
+GET /v1/media
+```
+
+Returns all media files with pagination.
+
+### Filtering by type
+
+```bash
+GET /v1/media?type=image
+```
+
+Supported types: `image`, `video`, `audio`, `document`
+
+### Media object structure
+
+```json
+{
+  "id": "cuid123",
+  "name": "dashboard-screenshot.png",
+  "url": "https://your-bucket.r2.dev/workspace/file.png",
+  "type": "image",
+  "size": 245678,
+  "alt": "Dashboard showing analytics",
+  "createdAt": "2024-03-15T10:30:00Z",
+  "updatedAt": "2024-03-15T10:30:00Z"
+}
+```
+
+<Info>
+  See the [API Reference](/api-reference/media) for complete details on media endpoints.
+</Info>
+
+## Webhooks
+
+Receive notifications when media is uploaded, updated, or deleted:
+
+- `media_uploaded` - New file added to library
+- `media_updated` - Media properties changed
+- `media_deleted` - File removed from library
+
+Configure webhooks in **Settings** > **Webhooks** to integrate with your workflow.

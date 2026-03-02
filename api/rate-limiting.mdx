@@ -1,0 +1,213 @@
+---
+title: Rate limiting
+description: Understand API rate limits, headers, and how to handle rate limit errors
+---
+
+The Marble API implements rate limiting to ensure fair usage and protect the service from abuse. Rate limits are enforced using Upstash Redis with a sliding window algorithm.
+
+## Rate limit tiers
+
+Rate limits vary depending on your authentication method:
+
+### API key routes
+
+Requests authenticated with API keys (to `/v1/posts`, `/v1/tags`, etc.) have higher rate limits:
+
+- **200 requests per 10 seconds** per IP address
+
+### Legacy workspace routes
+
+Legacy workspace routes (`/v1/:workspaceId/*`) have different limits based on whether a workspace ID is provided:
+
+- **With workspace ID**: 200 requests per 10 seconds per IP + workspace combination
+- **Without workspace ID**: 10 requests per 10 seconds per IP address
+
+<Note>
+  Rate limits are applied per IP address for API key routes, and per IP + workspace combination for legacy workspace routes.
+</Note>
+
+## Rate limit headers
+
+Every API response includes headers that show your current rate limit status:
+
+```http
+X-RateLimit-Limit: 200
+X-RateLimit-Remaining: 185
+X-RateLimit-Reset: 1709377815
+```
+
+- `X-RateLimit-Limit` - Maximum requests allowed in the current window
+- `X-RateLimit-Remaining` - Requests remaining in the current window
+- `X-RateLimit-Reset` - Unix timestamp when the rate limit resets
+
+<CodeGroup>
+
+```bash Check rate limit headers
+curl -i https://api.marblecms.com/v1/posts \
+  -H "Authorization: msk_abc123..."
+```
+
+```http Response headers
+HTTP/2 200
+content-type: application/json
+x-ratelimit-limit: 200
+x-ratelimit-remaining: 185
+x-ratelimit-reset: 1709377815
+
+{"data": [...], "pagination": {...}}
+```
+
+</CodeGroup>
+
+## Handling rate limit errors
+
+When you exceed the rate limit, the API returns a `429 Too Many Requests` response:
+
+```json
+{
+  "error": "Too many requests"
+}
+```
+
+The response includes the same rate limit headers showing when the limit will reset.
+
+### Retry strategy
+
+Implement exponential backoff when handling rate limit errors:
+
+<CodeGroup>
+
+```javascript JavaScript
+async function fetchWithRetry(url, options, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    const response = await fetch(url, options);
+    
+    if (response.status === 429) {
+      const resetTime = parseInt(response.headers.get('X-RateLimit-Reset'));
+      const waitTime = Math.max(resetTime * 1000 - Date.now(), 0);
+      
+      console.log(`Rate limited. Waiting ${waitTime}ms...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+      continue;
+    }
+    
+    return response;
+  }
+  
+  throw new Error('Max retries exceeded');
+}
+
+// Usage
+const response = await fetchWithRetry('https://api.marblecms.com/v1/posts', {
+  headers: { Authorization: 'msk_abc123...' }
+});
+```
+
+```python Python
+import time
+import requests
+
+def fetch_with_retry(url, headers, max_retries=3):
+    for i in range(max_retries):
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code == 429:
+            reset_time = int(response.headers.get('X-RateLimit-Reset', 0))
+            wait_time = max(reset_time - time.time(), 0)
+            
+            print(f'Rate limited. Waiting {wait_time}s...')
+            time.sleep(wait_time)
+            continue
+        
+        return response
+    
+    raise Exception('Max retries exceeded')
+
+# Usage
+response = fetch_with_retry(
+    'https://api.marblecms.com/v1/posts',
+    headers={'Authorization': 'msk_abc123...'}
+)
+```
+
+</CodeGroup>
+
+## Rate limit implementation
+
+The Marble API uses the following components for rate limiting:
+
+### Sliding window algorithm
+
+Rate limits use a sliding window algorithm from `@upstash/ratelimit`. This provides smooth rate limiting that doesn't reset all at once, preventing traffic spikes.
+
+### Identifier patterns
+
+Rate limits are tracked using different identifier patterns:
+
+**API key routes:**
+```
+apikey:{IP_ADDRESS}
+```
+
+**Legacy workspace routes:**
+```
+{IP_ADDRESS}:workspace:{WORKSPACE_ID}
+```
+
+Or just the IP address if no workspace ID is present.
+
+### IP address detection
+
+The API determines your IP address from the following headers (in order):
+
+1. `x-forwarded-for` - Standard proxy header
+2. `cf-connecting-ip` - Cloudflare connecting IP
+3. `anonymous` - Fallback if no IP detected
+
+<Note>
+  If the rate limiting service is unavailable (e.g., Redis is down), requests are allowed through to ensure API availability.
+</Note>
+
+## Monitoring your usage
+
+Every authenticated request increments your API key's request counter. You can monitor your API usage in the Marble CMS dashboard:
+
+1. Navigate to your workspace settings
+2. Go to "API Keys"
+3. View request counts and last usage time for each key
+
+## Usage limits
+
+In addition to rate limits, workspaces may have monthly API request quotas based on your subscription plan. When you approach your quota, you'll receive email notifications at:
+
+- 80% of quota
+- 90% of quota
+- 100% of quota (limit exceeded)
+
+If you exceed your monthly quota, you'll receive a `429 Too Many Requests` response:
+
+```json
+{
+  "error": "Usage limit exceeded",
+  "message": "You have reached your API request limit for this billing period. Please upgrade your plan or wait until your usage resets."
+}
+```
+
+<Warning>
+  Usage limit errors are different from rate limit errors. Usage limits are monthly quotas, while rate limits are short-term windows (10 seconds).
+</Warning>
+
+## Best practices
+
+To avoid hitting rate limits:
+
+- Implement caching on your side to reduce redundant requests
+- Use batch operations when available
+- Distribute requests over time instead of bursts
+- Monitor the `X-RateLimit-Remaining` header and slow down when approaching zero
+- Implement exponential backoff for retry logic
+- Consider upgrading your plan if you consistently hit limits
+
+## Increasing rate limits
+
+If your application requires higher rate limits, contact support to discuss enterprise pricing and custom rate limit configurations.

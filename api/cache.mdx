@@ -1,0 +1,127 @@
+---
+title: Cache invalidation
+description: Manually invalidate cached API responses for your workspace
+---
+
+## Invalidate cache
+
+<CodeGroup>
+```bash POST /v1/cache/invalidate
+curl -X POST "https://api.marblecms.com/v1/cache/invalidate" \
+  -H "Authorization: Bearer YOUR_SYSTEM_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "workspaceId": "your-workspace-id",
+    "resource": "posts"
+  }'
+```
+</CodeGroup>
+
+Manually invalidate cached API responses for specific resources or the entire workspace. This endpoint requires system authentication.
+
+<Warning>
+  This is an internal system endpoint that requires the `SYSTEM_SECRET` for authentication, not a regular API key. It is primarily used by the CMS dashboard to invalidate cache after content updates.
+</Warning>
+
+### Authentication
+
+This endpoint uses system authentication instead of API keys. Set the `Authorization` header to your `SYSTEM_SECRET`:
+
+```bash
+Authorization: Bearer your_system_secret
+```
+
+The `SYSTEM_SECRET` is configured in your environment variables and must match between the API and CMS applications.
+
+### Request body
+
+<ParamField body="workspaceId" type="string" required>
+  The workspace ID to invalidate cache for
+</ParamField>
+
+<ParamField body="resource" type="string">
+  Specific resource type to invalidate. If omitted, invalidates all cache for the workspace.
+  
+  Options:
+  - `posts` - Invalidate all post-related cache
+  - `categories` - Invalidate category cache
+  - `tags` - Invalidate tag cache
+  - `authors` - Invalidate author cache
+  - `usage` - Invalidate usage metrics cache
+</ParamField>
+
+### Response
+
+<ResponseField name="success" type="boolean">
+  Whether the cache invalidation was successful
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Human-readable message describing what was invalidated
+</ResponseField>
+
+<ResponseField name="workspaceId" type="string">
+  The workspace ID that was affected
+</ResponseField>
+
+<ResponseField name="resource" type="string">
+  The resource type that was invalidated (if specified)
+</ResponseField>
+
+<ResponseExample>
+```json 200 - Specific resource
+{
+  "success": true,
+  "message": "Invalidated 23 cache entries for posts",
+  "workspaceId": "your-workspace-id",
+  "resource": "posts"
+}
+```
+
+```json 200 - Entire workspace
+{
+  "success": true,
+  "message": "Invalidated 156 cache entries for workspace",
+  "workspaceId": "your-workspace-id"
+}
+```
+
+```json 200 - Usage cache
+{
+  "success": true,
+  "message": "Invalidated usage cache",
+  "workspaceId": "your-workspace-id",
+  "resource": "usage"
+}
+```
+
+```json 400 - Invalid request
+{
+  "error": "Invalid request body",
+  "details": [
+    {
+      "field": "workspaceId",
+      "message": "Required"
+    }
+  ]
+}
+```
+</ResponseExample>
+
+## Cache behavior
+
+The Marble API uses Redis-based caching with a 1-hour TTL (time-to-live) for all read endpoints. Cache is automatically invalidated when:
+
+- Content is created, updated, or deleted via the API
+- Content is modified through the CMS dashboard
+- Manual cache invalidation is triggered via this endpoint
+
+Cache keys are organized by workspace and resource type, allowing granular invalidation:
+
+- `posts` - Invalidates post lists and individual post cache
+- `categories` - Invalidates category lists and individual category cache
+- `tags` - Invalidates tag lists and individual tag cache  
+- `authors` - Invalidates author lists and individual author cache
+- `usage` - Invalidates usage metrics for the workspace
+
+Omitting the `resource` parameter invalidates all cache entries for the workspace.

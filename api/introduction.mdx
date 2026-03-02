@@ -1,0 +1,111 @@
+---
+title: Introduction
+description: Get started with the Marble REST API for managing and delivering content programmatically
+---
+
+The Marble API is a RESTful API for managing articles, product updates, and changelogs. It provides a simple and powerful way to integrate your content management workflows with external applications.
+
+## Base URL
+
+All API requests should be made to:
+
+```
+https://api.marblecms.com
+```
+
+## API versioning
+
+The Marble API uses URL-based versioning. All endpoints are prefixed with `/v1/`:
+
+```
+https://api.marblecms.com/v1/posts
+```
+
+<Note>
+  Non-versioned routes (e.g., `/posts`) are automatically redirected to `/v1/posts` with a 308 redirect.
+</Note>
+
+## OpenAPI specification
+
+The complete OpenAPI 3.1.0 specification is available at:
+
+```
+https://api.marblecms.com/openapi.json
+```
+
+You can use this specification to generate client libraries, explore the API in tools like Postman, or integrate with API development platforms.
+
+## Available endpoints
+
+The Marble API provides the following resource endpoints:
+
+- **Posts** - `/v1/posts` - Manage and retrieve articles
+- **Categories** - `/v1/categories` - Organize posts by category
+- **Tags** - `/v1/tags` - Tag posts for better discoverability
+- **Authors** - `/v1/authors` - Manage post authors
+- **Cache** - `/v1/cache/invalidate` - Invalidate cached content
+
+## Request format
+
+All `POST`, `PUT`, and `PATCH` requests should include a `Content-Type: application/json` header and send data as JSON in the request body.
+
+```bash
+curl -X POST https://api.marblecms.com/v1/posts \
+  -H "Authorization: msk_abc123..." \
+  -H "Content-Type: application/json" \
+  -d '{"title": "My Post", "content": "<p>Hello world</p>", "slug": "my-post", "categoryId": "cat_123"}'
+```
+
+## Response format
+
+All API responses are returned as JSON. Successful responses include the requested data, while error responses follow a consistent error format.
+
+```json
+{
+  "id": "cryitfjp5678mn09qrstuvwx",
+  "title": "My Post",
+  "slug": "my-post",
+  "status": "published",
+  "publishedAt": "2026-03-02T10:30:00.000Z"
+}
+```
+
+## Pagination
+
+List endpoints support pagination using `limit` and `page` query parameters:
+
+- `limit` - Number of items per page (1-100, default: 10)
+- `page` - Page number (starts at 1)
+
+Paginated responses include metadata about the total count and page information:
+
+```json
+{
+  "data": [...],
+  "pagination": {
+    "limit": 10,
+    "currentPage": 1,
+    "nextPage": 2,
+    "previousPage": null,
+    "totalPages": 5,
+    "totalItems": 42
+  }
+}
+```
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/api/authentication">
+    Learn how to authenticate your API requests
+  </Card>
+  <Card title="Rate limiting" icon="gauge" href="/api/rate-limiting">
+    Understand API rate limits and headers
+  </Card>
+  <Card title="Error handling" icon="triangle-exclamation" href="/api/errors">
+    Handle errors and status codes
+  </Card>
+  <Card title="Posts" icon="file-lines" href="/api/posts">
+    Start working with posts
+  </Card>
+</CardGroup>

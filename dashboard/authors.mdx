@@ -1,0 +1,354 @@
+---
+title: Authors
+description: Author management, linking to users, author profiles, and social links
+---
+
+Authors represent the people who create content in Marble. Each post can have one or more authors, including a primary author and optional co-authors.
+
+## What is an author?
+
+An author is a content creator profile that can be:
+
+- **Linked to a user** - Connected to a Marble user account for automatic profile sync
+- **Standalone** - Independent profile not tied to any user account
+
+Authors include rich profile information displayed alongside content:
+
+- Name and photo
+- Biography
+- Job title or role
+- Social media links
+- Email address
+
+<Info>
+  Authors are workspace-specific. The same user can have different author profiles in different workspaces.
+</Info>
+
+## Creating an author
+
+<Steps>
+  <Step title="Navigate to authors">
+    Click **Authors** in the sidebar to view all author profiles.
+  </Step>
+  <Step title="Click create button">
+    Click **New Author** to open the creation form.
+  </Step>
+  <Step title="Choose author type">
+    Decide whether to link to a user or create a standalone author:
+    
+    <Tabs>
+      <Tab title="Linked to user">
+        Select a team member from the dropdown. Their name, email, and photo will sync automatically.
+      </Tab>
+      <Tab title="Standalone">
+        Leave the user field empty and enter all details manually.
+      </Tab>
+    </Tabs>
+  </Step>
+  <Step title="Enter author details">
+    Fill in the author information:
+    
+    - **Name** - Full name (required)
+    - **Slug** - URL-friendly identifier (auto-generated from name)
+    - **Email** - Contact email (optional)
+    - **Bio** - Short biography or description
+    - **Role** - Job title or role (e.g., "Senior Editor")
+    - **Image** - Profile photo
+  </Step>
+  <Step title="Add social links">
+    Optionally add social media profiles (Twitter, LinkedIn, GitHub, etc.)
+  </Step>
+  <Step title="Save author">
+    Click **Create** to add the author profile.
+  </Step>
+</Steps>
+
+<Note>
+  Author slugs must be unique within your workspace. You cannot have two authors with the same slug.
+</Note>
+
+## Author properties
+
+### Basic information
+
+- **Name** - Author's display name (required)
+- **Slug** - Unique URL identifier (required)
+- **Email** - Contact email address (optional)
+- **Bio** - Author biography or description (optional)
+- **Role** - Job title, position, or role (optional)
+- **Image** - Profile photo or avatar (optional)
+
+### User linking
+
+- **User ID** - Reference to a Marble user account (optional)
+- **Linked user** - If connected, the author inherits the user's name, email, and profile photo
+
+<Info>
+  When an author is linked to a user, changes to the user's profile (name, email, image) automatically update the author profile.
+</Info>
+
+### Social links
+
+Add links to social media profiles and websites:
+
+- **Twitter** - Twitter/X profile URL
+- **LinkedIn** - LinkedIn profile URL
+- **GitHub** - GitHub profile URL
+- **Website** - Personal website or blog
+- **Custom** - Any other social platform
+
+Social links are included in API responses and can be displayed on your frontend.
+
+### Status
+
+- **Active** - Author is available for assignment to posts
+- **Inactive** - Author is hidden from the author selector but existing posts remain unchanged
+
+<Note>
+  Deactivating an author doesn't remove them from existing posts. It only prevents them from being assigned to new posts.
+</Note>
+
+## Linked vs standalone authors
+
+<Tabs>
+  <Tab title="Linked authors">
+    **Best for:** Team members who create content
+    
+    **Advantages:**
+    - Automatic profile sync from user account
+    - Name, email, and photo stay up-to-date
+    - Associates content with user identity
+    
+    **Example:** Your marketing team members who write blog posts
+    
+    <Note>
+      Each user can only be linked to one author per workspace. A user can have different author profiles in different workspaces.
+    </Note>
+  </Tab>
+  <Tab title="Standalone authors">
+    **Best for:** External contributors, guest authors, historical authors
+    
+    **Advantages:**
+    - Full control over profile information
+    - No user account required
+    - Can represent anyone, even non-users
+    
+    **Example:** Guest bloggers, freelance writers, or company founders who don't need dashboard access
+  </Tab>
+</Tabs>
+
+## Assigning authors to posts
+
+Posts can have multiple authors:
+
+### Primary author
+
+The primary author is the main content creator, displayed prominently:
+
+<Steps>
+  <Step title="Open post editor">
+    Create or edit a post.
+  </Step>
+  <Step title="Open sidebar">
+    Click the settings icon to open the post sidebar.
+  </Step>
+  <Step title="Select primary author">
+    In the **Primary author** field, choose an author from the dropdown.
+  </Step>
+  <Step title="Save post">
+    Click **Save** or **Publish** to apply the author.
+  </Step>
+</Steps>
+
+<Info>
+  Every post must have exactly one primary author. If you don't select one, the current user's author profile is assigned by default.
+</Info>
+
+### Co-authors
+
+Add additional authors to credit multiple contributors:
+
+<Steps>
+  <Step title="Open authors field">
+    In the post sidebar, find the **Co-authors** field.
+  </Step>
+  <Step title="Select authors">
+    Choose one or more additional authors from the dropdown.
+  </Step>
+  <Step title="Reorder if needed">
+    Drag authors to reorder them.
+  </Step>
+  <Step title="Save post">
+    Click **Save** or **Publish** to apply the co-authors.
+  </Step>
+</Steps>
+
+<Note>
+  Co-authors are optional. You can have 0, 1, or many co-authors on a single post.
+</Note>
+
+## Editing author profiles
+
+<Steps>
+  <Step title="Find the author">
+    Locate the author in the Authors list.
+  </Step>
+  <Step title="Click edit">
+    Click the edit icon or author name to open the editor.
+  </Step>
+  <Step title="Update details">
+    Modify any author information:
+    
+    - Name, bio, role, email
+    - Profile image
+    - Social links
+  </Step>
+  <Step title="Save changes">
+    Click **Update** to save your changes.
+  </Step>
+</Steps>
+
+<Warning>
+  For linked authors, name, email, and image are synced from the user account and cannot be edited directly. Update the user's profile instead.
+</Warning>
+
+## Deactivating authors
+
+If an author is no longer creating content but you want to preserve their existing posts:
+
+<Steps>
+  <Step title="Edit the author">
+    Open the author profile editor.
+  </Step>
+  <Step title="Toggle active status">
+    Turn off the **Active** toggle.
+  </Step>
+  <Step title="Save changes">
+    Click **Update** to deactivate the author.
+  </Step>
+</Steps>
+
+Inactive authors:
+
+- Still appear on posts they've authored
+- Are not shown in the author selector for new posts
+- Remain in the authors list (with "Inactive" badge)
+- Can be reactivated at any time
+
+## Deleting authors
+
+<Warning>
+  You cannot delete an author who has posts. Reassign or delete their posts first, or deactivate the author instead.
+</Warning>
+
+<Steps>
+  <Step title="Check post count">
+    Ensure the author has 0 posts (both as primary and co-author).
+  </Step>
+  <Step title="Click delete">
+    Click the menu icon (⋯) and select **Delete**.
+  </Step>
+  <Step title="Confirm deletion">
+    Confirm the action. The author will be permanently deleted.
+  </Step>
+</Steps>
+
+## User unlinking
+
+If you need to disconnect an author from their user account:
+
+<Steps>
+  <Step title="Edit the author">
+    Open the author profile editor.
+  </Step>
+  <Step title="Clear user link">
+    Remove the selected user from the **Linked user** field.
+  </Step>
+  <Step title="Update manual fields">
+    The name, email, and image fields become editable. Fill them in manually.
+  </Step>
+  <Step title="Save changes">
+    Click **Update** to convert to a standalone author.
+  </Step>
+</Steps>
+
+<Note>
+  Once unlinked, the author profile no longer syncs with the user account. Changes must be made manually.
+</Note>
+
+## Author API
+
+Authors are included in post responses and can be fetched independently:
+
+### Fetching all authors
+
+```bash
+GET /v1/authors
+```
+
+Returns all active authors in the workspace.
+
+### Fetching a specific author
+
+```bash
+GET /v1/authors/:slug
+```
+
+Get a single author by their slug.
+
+### Author fields in API responses
+
+Author objects include:
+
+```json
+{
+  "id": "cuid123",
+  "name": "Jane Doe",
+  "slug": "jane-doe",
+  "email": "jane@example.com",
+  "bio": "Senior content strategist",
+  "role": "Editor-in-Chief",
+  "image": "https://example.com/jane.jpg",
+  "socials": [
+    {
+      "platform": "twitter",
+      "url": "https://twitter.com/janedoe"
+    },
+    {
+      "platform": "linkedin",
+      "url": "https://linkedin.com/in/janedoe"
+    }
+  ],
+  "isActive": true
+}
+```
+
+<Info>
+  See the [API Reference](/api-reference/authors) for complete details on author endpoints and filtering.
+</Info>
+
+## Best practices
+
+<Accordion title="Link team members to users">
+  For anyone with dashboard access, create a linked author profile. This ensures their information stays synchronized.
+</Accordion>
+
+<Accordion title="Use standalone for guests">
+  Guest bloggers, freelancers, and external contributors should have standalone author profiles since they don't need user accounts.
+</Accordion>
+
+<Accordion title="Keep bios concise">
+  Author bios should be 2-3 sentences. Save detailed information for social profiles or personal websites.
+</Accordion>
+
+<Accordion title="Add social links">
+  Social links build credibility and help readers connect with authors. Include at least Twitter or LinkedIn.
+</Accordion>
+
+<Accordion title="Use high-quality images">
+  Profile photos should be clear, professional headshots. Minimum 400x400px recommended.
+</Accordion>
+
+<Accordion title="Deactivate instead of delete">
+  When someone leaves your team, deactivate their author profile rather than deleting it. This preserves their content history.
+</Accordion>

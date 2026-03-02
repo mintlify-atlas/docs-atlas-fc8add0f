@@ -1,0 +1,469 @@
+---
+title: Editor
+description: Tiptap rich text editor features, AI assistance, and markdown export
+---
+
+The Marble editor is a powerful, distraction-free writing environment built on Tiptap. It combines rich text editing with markdown support, AI assistance, and real-time collaboration features.
+
+## Editor interface
+
+The editor is designed for focused content creation:
+
+- **Title field** - Large, prominent text area for your post title
+- **Content area** - Spacious editor canvas with prose styling
+- **Floating toolbar** - Context-aware formatting options
+- **Slash commands** - Quick access to all content blocks
+- **Sidebar** - Post settings, metadata, and publishing options
+
+<Info>
+  The editor automatically saves your work as you type. Look for the "Saved" indicator in the header.
+</Info>
+
+## Text formatting
+
+Format text using keyboard shortcuts or the floating toolbar that appears when you select text:
+
+### Basic formatting
+
+| Format | Shortcut | Description |
+|--------|----------|-------------|
+| **Bold** | `Cmd/Ctrl + B` | Make text bold |
+| *Italic* | `Cmd/Ctrl + I` | Italicize text |
+| <u>Underline</u> | `Cmd/Ctrl + U` | Underline text |
+| ~~Strikethrough~~ | `Cmd/Ctrl + Shift + X` | Strike through text |
+| `Code` | `Cmd/Ctrl + E` | Inline code formatting |
+
+### Advanced formatting
+
+- **Text color** - Change text color from the toolbar
+- **Highlight** - Highlight text with customizable colors
+- **Superscript** - For mathematical notation (x²)
+- **Subscript** - For chemical formulas (H₂O)
+- **Links** - Add hyperlinks with `Cmd/Ctrl + K`
+
+<Note>
+  Multiple formats can be combined. For example, you can have bold, italic, and colored text simultaneously.
+</Note>
+
+## Headings
+
+Organize content with hierarchical headings:
+
+- **Heading 1** - `Cmd/Ctrl + Alt + 1` - Main sections
+- **Heading 2** - `Cmd/Ctrl + Alt + 2` - Subsections
+- **Heading 3** - `Cmd/Ctrl + Alt + 3` - Sub-subsections
+
+Or type `#` for H1, `##` for H2, `###` for H3 at the start of a line.
+
+<Info>
+  Headings automatically generate anchor links for table of contents and deep linking.
+</Info>
+
+## Slash commands
+
+Press `/` anywhere in the editor to open the command menu:
+
+### Content blocks
+
+<Accordion title="Text blocks">
+  - `/heading1` - Large heading
+  - `/heading2` - Medium heading
+  - `/heading3` - Small heading
+  - `/paragraph` - Normal paragraph
+  - `/quote` - Blockquote
+</Accordion>
+
+<Accordion title="Lists">
+  - `/bullet` - Bullet list
+  - `/numbered` - Numbered list
+  - `/task` - Task list with checkboxes
+</Accordion>
+
+<Accordion title="Media">
+  - `/image` - Upload or insert image
+  - `/video` - Upload or embed video
+  - `/youtube` - Embed YouTube video
+  - `/twitter` - Embed Twitter/X post
+</Accordion>
+
+<Accordion title="Code">
+  - `/code` - Code block with syntax highlighting
+  - `/table` - Insert table
+</Accordion>
+
+<Tabs>
+  <Tab title="Tip">
+    Type a few letters after `/` to filter commands. For example, `/im` shows image options.
+  </Tab>
+</Tabs>
+
+## Lists
+
+Create organized, hierarchical content:
+
+### Bullet lists
+
+Type `-` or `*` followed by space, or use `Cmd/Ctrl + Shift + 8`:
+
+- First item
+- Second item
+  - Nested item (press Tab to indent)
+  - Another nested item
+- Back to top level (press Shift + Tab to outdent)
+
+### Numbered lists
+
+Type `1.` followed by space, or use `Cmd/Ctrl + Shift + 7`:
+
+1. First step
+2. Second step
+   1. Sub-step (press Tab)
+   2. Another sub-step
+3. Third step
+
+### Task lists
+
+Create interactive checklists with `/task`:
+
+- [ ] Incomplete task
+- [x] Completed task
+- [ ] Another task
+  - [ ] Nested task
+
+Click checkboxes to toggle completion.
+
+## Code blocks
+
+Insert syntax-highlighted code with `/code`:
+
+<Steps>
+  <Step title="Insert code block">
+    Type `/code` and press Enter.
+  </Step>
+  <Step title="Select language">
+    Choose from 100+ supported languages (JavaScript, Python, TypeScript, etc.).
+  </Step>
+  <Step title="Paste or write code">
+    Add your code. Syntax highlighting is applied automatically.
+  </Step>
+  <Step title="Copy code">
+    Readers can click the copy button to copy the code.
+  </Step>
+</Steps>
+
+Supported languages include:
+- JavaScript, TypeScript, JSX, TSX
+- Python, Ruby, Go, Rust
+- HTML, CSS, SCSS, YAML, JSON
+- Bash, Shell, SQL
+- And 90+ more
+
+<Info>
+  Code blocks use [lowlight](https://github.com/wooorm/lowlight) for syntax highlighting with the same engine as GitHub.
+</Info>
+
+## Tables
+
+Create rich, formatted tables:
+
+<Steps>
+  <Step title="Insert table">
+    Type `/table` and press Enter.
+  </Step>
+  <Step title="Customize structure">
+    Use the table toolbar to:
+    - Add/remove rows and columns
+    - Merge/split cells
+    - Delete the table
+  </Step>
+  <Step title="Format content">
+    Format text within cells using standard formatting options.
+  </Step>
+</Steps>
+
+### Table controls
+
+Hover over a table to reveal controls:
+
+- **Row controls** - Add/delete rows above or below
+- **Column controls** - Add/delete columns left or right
+- **Cell menu** - Merge cells, change alignment
+
+<Note>
+  Tables support all text formatting, including bold, italic, links, and inline code.
+</Note>
+
+## Images
+
+Add images to your posts in multiple ways:
+
+### Upload new image
+
+<Steps>
+  <Step title="Trigger image insert">
+    Type `/image`, click the image button, or drag and drop an image file.
+  </Step>
+  <Step title="Choose upload">
+    Select **Upload image** from the menu.
+  </Step>
+  <Step title="Select file">
+    Choose an image file from your computer (JPG, PNG, WebP, GIF).
+  </Step>
+  <Step title="Wait for upload">
+    The image uploads to Cloudflare R2 and is inserted into your post.
+  </Step>
+  <Step title="Add caption (optional)">
+    Click below the image to add a caption.
+  </Step>
+</Steps>
+
+### Insert from library
+
+<Steps>
+  <Step title="Open image menu">
+    Type `/image` or click the image button.
+  </Step>
+  <Step title="Browse library">
+    Click **Browse library** to see previously uploaded images.
+  </Step>
+  <Step title="Select image">
+    Click an image to insert it into your post.
+  </Step>
+</Steps>
+
+### Image features
+
+- **Captions** - Add descriptive captions below images
+- **Alt text** - Set accessibility descriptions
+- **Resizing** - Drag corners to resize images
+- **Alignment** - Left, center, or right alignment
+
+<Info>
+  Images are automatically stored in your media library and can be reused in other posts.
+</Info>
+
+## Videos
+
+Embed or upload videos:
+
+### Upload video
+
+<Steps>
+  <Step title="Insert video">
+    Type `/video` or drag and drop a video file.
+  </Step>
+  <Step title="Select file">
+    Choose a video file (MP4, WebM, MOV, up to 100 MB).
+  </Step>
+  <Step title="Wait for upload">
+    Video uploads to Cloudflare R2 and is embedded in your post.
+  </Step>
+  <Step title="Add caption (optional)">
+    Click below the video to add a caption.
+  </Step>
+</Steps>
+
+### Embed YouTube
+
+<Steps>
+  <Step title="Get YouTube URL">
+    Copy the URL of the YouTube video.
+  </Step>
+  <Step title="Insert embed">
+    Type `/youtube` and press Enter.
+  </Step>
+  <Step title="Paste URL">
+    Paste the YouTube URL and press Enter.
+  </Step>
+</Steps>
+
+YouTube embeds are responsive and include standard player controls.
+
+### Embed Twitter/X
+
+<Steps>
+  <Step title="Get tweet URL">
+    Copy the URL of the tweet.
+  </Step>
+  <Step title="Insert embed">
+    Type `/twitter` and press Enter.
+  </Step>
+  <Step title="Paste URL">
+    Paste the tweet URL and press Enter.
+  </Step>
+</Steps>
+
+<Note>
+  For large videos, YouTube or Vimeo embeds are recommended over direct uploads for better performance.
+</Note>
+
+## Markdown support
+
+The editor supports markdown input and export:
+
+### Markdown shortcuts
+
+Type markdown syntax and it's automatically formatted:
+
+- `**bold**` → **bold**
+- `*italic*` → *italic*
+- `~~strike~~` → ~~strikethrough~~
+- `[link](url)` → hyperlink
+- `` `code` `` → inline code
+- `> quote` → blockquote
+
+### Paste markdown
+
+Paste markdown content directly into the editor:
+
+1. Copy markdown text from anywhere
+2. Paste into the editor (`Cmd/Ctrl + V`)
+3. Markdown is automatically converted to formatted content
+
+### Export as markdown
+
+Export your post as markdown:
+
+1. Open the post in the editor
+2. Click the menu icon (⋯) in the header
+3. Select **Export as markdown**
+4. A `.md` file is downloaded
+
+<Info>
+  Markdown export preserves all formatting, including headings, lists, links, and code blocks.
+</Info>
+
+## AI assistance
+
+Marble includes optional AI-powered features to improve your writing:
+
+### Enabling AI
+
+<Steps>
+  <Step title="Navigate to editor settings">
+    Go to **Settings** > **Editor** in your workspace.
+  </Step>
+  <Step title="Enable AI">
+    Toggle **AI assistance** on.
+  </Step>
+  <Step title="Save settings">
+    AI features are now available in the editor.
+  </Step>
+</Steps>
+
+<Warning>
+  AI features may require additional configuration and incur costs. Contact your workspace owner for details.
+</Warning>
+
+### AI features
+
+When enabled, AI can help with:
+
+- **Writing suggestions** - Improve clarity and style
+- **Grammar checking** - Catch errors and typos
+- **Readability analysis** - Optimize for your audience
+- **Content expansion** - Generate ideas and outlines
+
+<Note>
+  AI features are workspace-level settings. All team members share the same configuration.
+</Note>
+
+## Keyboard shortcuts
+
+Master these shortcuts for faster editing:
+
+### Formatting
+
+| Action | Shortcut |
+|--------|----------|
+| Bold | `Cmd/Ctrl + B` |
+| Italic | `Cmd/Ctrl + I` |
+| Underline | `Cmd/Ctrl + U` |
+| Strikethrough | `Cmd/Ctrl + Shift + X` |
+| Code | `Cmd/Ctrl + E` |
+| Link | `Cmd/Ctrl + K` |
+
+### Content structure
+
+| Action | Shortcut |
+|--------|----------|
+| Heading 1 | `Cmd/Ctrl + Alt + 1` |
+| Heading 2 | `Cmd/Ctrl + Alt + 2` |
+| Heading 3 | `Cmd/Ctrl + Alt + 3` |
+| Bullet list | `Cmd/Ctrl + Shift + 8` |
+| Numbered list | `Cmd/Ctrl + Shift + 7` |
+| Blockquote | `Cmd/Ctrl + Shift + B` |
+
+### Editor actions
+
+| Action | Shortcut |
+|--------|----------|
+| Undo | `Cmd/Ctrl + Z` |
+| Redo | `Cmd/Ctrl + Shift + Z` |
+| Save | `Cmd/Ctrl + S` |
+| Find | `Cmd/Ctrl + F` |
+| Select all | `Cmd/Ctrl + A` |
+
+## Character count
+
+The editor displays a live character count at the bottom:
+
+- Total characters (including spaces)
+- Word count
+- Reading time estimate
+
+Use this to track content length and ensure consistency across posts.
+
+## Editor preferences
+
+Customize the editor experience:
+
+### Workspace settings
+
+Go to **Settings** > **Editor** to configure:
+
+- **AI assistance** - Enable or disable AI features
+- **Auto-save interval** - How often content is saved
+- **Default status** - Draft or published for new posts
+
+### User preferences
+
+Personal editor preferences (saved per user):
+
+- **Font size** - Adjust editor text size
+- **Line height** - Change spacing for readability
+- **Focus mode** - Hide sidebars for distraction-free writing
+
+<Note>
+  User preferences are saved in your browser and apply across all workspaces.
+</Note>
+
+## Tips for great content
+
+<Accordion title="Use headings for structure">
+  Break content into sections with H2 and H3 headings. This improves readability and SEO.
+</Accordion>
+
+<Accordion title="Keep paragraphs short">
+  Aim for 2-3 sentences per paragraph. Short paragraphs are easier to read on screens.
+</Accordion>
+
+<Accordion title="Add visual breaks">
+  Use images, videos, code blocks, and lists to break up long text sections.
+</Accordion>
+
+<Accordion title="Write clear link text">
+  Instead of "click here," use descriptive link text: "read our API documentation."
+</Accordion>
+
+<Accordion title="Optimize images">
+  Compress and resize images before uploading to improve page load times.
+</Accordion>
+
+<Accordion title="Use code blocks for commands">
+  Format terminal commands, code snippets, and configuration in code blocks with syntax highlighting.
+</Accordion>
+
+<Accordion title="Add alt text to images">
+  Always provide descriptive alt text for accessibility and SEO.
+</Accordion>

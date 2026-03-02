@@ -1,0 +1,316 @@
+---
+title: Categories and tags
+description: Organizing content with categories and tags for better structure and discovery
+---
+
+Categories and tags help you organize content in Marble. Use categories for broad content structure and tags for flexible, cross-cutting organization.
+
+## Categories
+
+Categories provide hierarchical organization for your posts. Each post must belong to exactly one category.
+
+### When to use categories
+
+Use categories to:
+
+- Divide content into major topics or sections
+- Create distinct content types (blog, tutorials, news)
+- Organize by product areas or departments
+- Structure content for navigation
+
+<Info>
+  Categories are mandatory for every post. Plan your category structure before creating content.
+</Info>
+
+### Creating a category
+
+<Steps>
+  <Step title="Navigate to categories">
+    Click **Categories** in the sidebar.
+  </Step>
+  <Step title="Click create button">
+    Click **New Category** to open the creation form.
+  </Step>
+  <Step title="Enter category details">
+    Provide a name, slug, and optional description:
+    
+    - **Name** - Display name (e.g., "Product Updates")
+    - **Slug** - URL-friendly identifier (e.g., "product-updates")
+    - **Description** - Optional explanation of the category's purpose
+  </Step>
+  <Step title="Save category">
+    Click **Create** to add the category.
+  </Step>
+</Steps>
+
+<Note>
+  Category slugs must be unique within your workspace and cannot be changed after creation.
+</Note>
+
+### Category properties
+
+Each category has:
+
+- **Name** - Human-readable category name
+- **Slug** - Unique URL identifier
+- **Description** - Optional detailed description
+- **Post count** - Number of posts in the category
+- **Created date** - When the category was created
+- **Updated date** - Last modification time
+
+### Editing categories
+
+<Steps>
+  <Step title="Find the category">
+    Locate the category in the Categories list.
+  </Step>
+  <Step title="Click edit">
+    Click the edit icon or category name to open the editor.
+  </Step>
+  <Step title="Update details">
+    Modify the name or description as needed.
+  </Step>
+  <Step title="Save changes">
+    Click **Update** to save your changes.
+  </Step>
+</Steps>
+
+<Warning>
+  You cannot change the category slug after creation. If you need a different slug, create a new category and reassign posts.
+</Warning>
+
+### Deleting categories
+
+<Warning>
+  You cannot delete a category that has posts assigned to it. Reassign posts to another category first.
+</Warning>
+
+<Steps>
+  <Step title="Check post count">
+    Ensure the category has 0 posts assigned.
+  </Step>
+  <Step title="Click delete">
+    Click the menu icon (⋯) and select **Delete**.
+  </Step>
+  <Step title="Confirm deletion">
+    Confirm the action. The category will be permanently deleted.
+  </Step>
+</Steps>
+
+Deleting a category triggers the `category_deleted` webhook event if configured.
+
+### Reassigning posts
+
+To move posts to a different category:
+
+<Steps>
+  <Step title="Edit the post">
+    Open the post editor.
+  </Step>
+  <Step title="Change category">
+    In the sidebar, select a new category from the dropdown.
+  </Step>
+  <Step title="Save changes">
+    Click **Update** to save the new category assignment.
+  </Step>
+</Steps>
+
+You can also bulk reassign posts:
+
+1. Select multiple posts in the Posts list
+2. Click **Change category**
+3. Choose the new category
+4. Confirm the change
+
+## Tags
+
+Tags provide flexible, non-hierarchical organization. Posts can have multiple tags, making them ideal for cross-cutting topics and filtering.
+
+### When to use tags
+
+Use tags to:
+
+- Mark posts with multiple relevant topics
+- Enable filtering and search
+- Group content across categories
+- Identify specific technologies, features, or themes
+
+<Info>
+  Tags are optional but recommended. They make content discovery easier for both API consumers and readers.
+</Info>
+
+### Creating a tag
+
+<Steps>
+  <Step title="Navigate to tags">
+    Click **Tags** in the sidebar.
+  </Step>
+  <Step title="Click create button">
+    Click **New Tag** to open the creation form.
+  </Step>
+  <Step title="Enter tag details">
+    Provide a name, slug, and optional description:
+    
+    - **Name** - Display name (e.g., "TypeScript")
+    - **Slug** - URL-friendly identifier (e.g., "typescript")
+    - **Description** - Optional explanation of what this tag represents
+  </Step>
+  <Step title="Save tag">
+    Click **Create** to add the tag.
+  </Step>
+</Steps>
+
+### Tag properties
+
+Each tag has:
+
+- **Name** - Human-readable tag name
+- **Slug** - Unique URL identifier
+- **Description** - Optional detailed description
+- **Post count** - Number of posts using the tag
+- **Created date** - When the tag was created
+- **Updated date** - Last modification time
+
+### Adding tags to posts
+
+Assign tags when creating or editing a post:
+
+<Steps>
+  <Step title="Open post editor">
+    Create a new post or edit an existing one.
+  </Step>
+  <Step title="Open sidebar">
+    Click the settings icon to open the sidebar.
+  </Step>
+  <Step title="Select tags">
+    In the Tags field, search and select one or more tags.
+  </Step>
+  <Step title="Create tags inline">
+    If the tag doesn't exist, type the name and press Enter to create it.
+  </Step>
+  <Step title="Save post">
+    Click **Save** or **Publish** to apply the tags.
+  </Step>
+</Steps>
+
+<Note>
+  You can create new tags directly from the post editor without navigating to the Tags page.
+</Note>
+
+### Editing tags
+
+<Steps>
+  <Step title="Find the tag">
+    Locate the tag in the Tags list.
+  </Step>
+  <Step title="Click edit">
+    Click the edit icon or tag name to open the editor.
+  </Step>
+  <Step title="Update details">
+    Modify the name or description as needed.
+  </Step>
+  <Step title="Save changes">
+    Click **Update** to save your changes.
+  </Step>
+</Steps>
+
+### Deleting tags
+
+<Steps>
+  <Step title="Find the tag">
+    Locate the tag in the Tags list.
+  </Step>
+  <Step title="Click delete">
+    Click the menu icon (⋯) and select **Delete**.
+  </Step>
+  <Step title="Confirm deletion">
+    Confirm the action. The tag will be removed from all posts.
+  </Step>
+</Steps>
+
+<Warning>
+  Deleting a tag removes it from all posts that use it. This action cannot be undone.
+</Warning>
+
+Deleting a tag triggers the `tag_deleted` webhook event if configured.
+
+## Best practices
+
+### Category strategy
+
+<Accordion title="Keep categories broad and stable">
+  Categories should represent major content divisions that won't change frequently. Avoid creating too many categories - 5-10 is ideal for most publications.
+</Accordion>
+
+<Accordion title="Use descriptive names">
+  Category names should be clear and self-explanatory. Avoid jargon or abbreviations that might confuse readers.
+</Accordion>
+
+<Accordion title="Plan for growth">
+  Think about how your content will scale. Will new topics fit into existing categories, or will you need to add more?
+</Accordion>
+
+### Tag strategy
+
+<Accordion title="Create tags as needed">
+  Don't pre-create all tags. Add them organically as you write content to ensure they're relevant and useful.
+</Accordion>
+
+<Accordion title="Use consistent naming">
+  Establish conventions for tag names (e.g., lowercase, singular vs. plural) and stick to them.
+</Accordion>
+
+<Accordion title="Limit tags per post">
+  Aim for 3-5 tags per post. Too many tags dilute their value and make filtering less effective.
+</Accordion>
+
+<Accordion title="Merge duplicate tags">
+  Periodically review tags to identify and merge duplicates (e.g., "JavaScript" and "javascript").
+</Accordion>
+
+## Using categories and tags in the API
+
+Categories and tags are included in API responses and support filtering:
+
+### Fetching posts by category
+
+```bash
+GET /v1/posts?category=product-updates
+```
+
+### Fetching posts by tag
+
+```bash
+GET /v1/posts?tags=typescript,react
+```
+
+### Listing all categories
+
+```bash
+GET /v1/categories
+```
+
+### Listing all tags
+
+```bash
+GET /v1/tags
+```
+
+<Info>
+  See the [API Reference](/api-reference) for complete details on filtering and querying posts by categories and tags.
+</Info>
+
+## Webhooks
+
+Marble can notify external systems when categories and tags are created, updated, or deleted:
+
+- `category_created` - New category added
+- `category_updated` - Category modified
+- `category_deleted` - Category removed
+- `tag_created` - New tag added
+- `tag_updated` - Tag modified
+- `tag_deleted` - Tag removed
+
+<Info>
+  Configure webhooks in **Settings** > **Webhooks** to receive these events.
+</Info>

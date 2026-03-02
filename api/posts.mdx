@@ -1,0 +1,605 @@
+---
+title: Posts
+description: Manage and retrieve blog posts with filtering, pagination, and search
+---
+
+## List posts
+
+<CodeGroup>
+```bash GET /v1/posts
+curl -X GET "https://api.marblecms.com/v1/posts?limit=10&page=1" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</CodeGroup>
+
+Retrieve a paginated list of posts with optional filtering by status, category, tags, and search query.
+
+### Query parameters
+
+<ParamField query="limit" type="integer" default="10">
+  Number of posts per page (1-100)
+</ParamField>
+
+<ParamField query="page" type="integer" default="1">
+  Page number
+</ParamField>
+
+<ParamField query="order" type="string" default="desc">
+  Sort order by publishedAt. Options: `asc`, `desc`
+</ParamField>
+
+<ParamField query="status" type="string" default="published">
+  Filter by post status. Options: `published`, `draft`, `all`
+</ParamField>
+
+<ParamField query="categories" type="string">
+  Comma-separated category slugs to include (e.g., `tech,news`)
+</ParamField>
+
+<ParamField query="excludeCategories" type="string">
+  Comma-separated category slugs to exclude (e.g., `changelog`)
+</ParamField>
+
+<ParamField query="tags" type="string">
+  Comma-separated tag slugs to include (e.g., `javascript,react`)
+</ParamField>
+
+<ParamField query="excludeTags" type="string">
+  Comma-separated tag slugs to exclude (e.g., `outdated`)
+</ParamField>
+
+<ParamField query="query" type="string">
+  Search query for title and content (e.g., `nextjs`)
+</ParamField>
+
+<ParamField query="featured" type="string">
+  Filter by featured status. Options: `true`, `false`
+</ParamField>
+
+<ParamField query="format" type="string" default="html">
+  Content format. Options: `html`, `markdown`
+</ParamField>
+
+### Response
+
+<ResponseField name="posts" type="array">
+  Array of post objects
+  <Expandable title="Post object">
+    <ResponseField name="id" type="string">
+      Unique post identifier
+    </ResponseField>
+    <ResponseField name="slug" type="string">
+      URL-friendly post slug
+    </ResponseField>
+    <ResponseField name="title" type="string">
+      Post title
+    </ResponseField>
+    <ResponseField name="content" type="string">
+      Post content in HTML or Markdown format
+    </ResponseField>
+    <ResponseField name="description" type="string">
+      Post description or excerpt
+    </ResponseField>
+    <ResponseField name="coverImage" type="string" nullable>
+      URL to cover image
+    </ResponseField>
+    <ResponseField name="featured" type="boolean">
+      Whether the post is featured
+    </ResponseField>
+    <ResponseField name="publishedAt" type="string">
+      ISO 8601 datetime when post was published
+    </ResponseField>
+    <ResponseField name="updatedAt" type="string">
+      ISO 8601 datetime when post was last updated
+    </ResponseField>
+    <ResponseField name="attribution" type="object" nullable>
+      Attribution to original author when republishing content
+      <Expandable title="Attribution object">
+        <ResponseField name="author" type="string">
+          Original author name
+        </ResponseField>
+        <ResponseField name="url" type="string">
+          URL to original content
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="authors" type="array">
+      Array of author objects
+      <Expandable title="Author object">
+        <ResponseField name="id" type="string">
+          Author ID
+        </ResponseField>
+        <ResponseField name="name" type="string">
+          Author name
+        </ResponseField>
+        <ResponseField name="slug" type="string">
+          Author slug
+        </ResponseField>
+        <ResponseField name="image" type="string" nullable>
+          Author avatar URL
+        </ResponseField>
+        <ResponseField name="bio" type="string" nullable>
+          Author bio
+        </ResponseField>
+        <ResponseField name="role" type="string" nullable>
+          Author role
+        </ResponseField>
+        <ResponseField name="socials" type="array">
+          Social media links
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="category" type="object">
+      Category object
+      <Expandable title="Category object">
+        <ResponseField name="id" type="string">
+          Category ID
+        </ResponseField>
+        <ResponseField name="name" type="string">
+          Category name
+        </ResponseField>
+        <ResponseField name="slug" type="string">
+          Category slug
+        </ResponseField>
+        <ResponseField name="description" type="string" nullable>
+          Category description
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="tags" type="array">
+      Array of tag objects
+      <Expandable title="Tag object">
+        <ResponseField name="id" type="string">
+          Tag ID
+        </ResponseField>
+        <ResponseField name="name" type="string">
+          Tag name
+        </ResponseField>
+        <ResponseField name="slug" type="string">
+          Tag slug
+        </ResponseField>
+        <ResponseField name="description" type="string" nullable>
+          Tag description
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Pagination metadata
+  <Expandable title="Pagination object">
+    <ResponseField name="limit" type="integer">
+      Items per page
+    </ResponseField>
+    <ResponseField name="currentPage" type="integer">
+      Current page number
+    </ResponseField>
+    <ResponseField name="nextPage" type="integer" nullable>
+      Next page number or null
+    </ResponseField>
+    <ResponseField name="previousPage" type="integer" nullable>
+      Previous page number or null
+    </ResponseField>
+    <ResponseField name="totalPages" type="integer">
+      Total number of pages
+    </ResponseField>
+    <ResponseField name="totalItems" type="integer">
+      Total number of items
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json 200
+{
+  "posts": [
+    {
+      "id": "cryitfjp5678mn09qrstuvwx",
+      "slug": "getting-started-with-nextjs",
+      "title": "Getting Started with Next.js",
+      "content": "<p>Hello world</p>",
+      "description": "A beginner's guide to Next.js",
+      "coverImage": "https://media.marblecms.com/cover.jpg",
+      "featured": false,
+      "publishedAt": "2024-01-15T10:00:00Z",
+      "updatedAt": "2024-01-16T12:00:00Z",
+      "attribution": null,
+      "authors": [
+        {
+          "id": "cryitfjp1234jl04vdnycek8",
+          "name": "John Doe",
+          "slug": "john-doe",
+          "image": "https://media.marblecms.com/avatar.jpg",
+          "bio": "Technical writer and developer",
+          "role": "Editor",
+          "socials": [
+            {
+              "url": "https://twitter.com/johndoe",
+              "platform": "twitter"
+            }
+          ]
+        }
+      ],
+      "category": {
+        "id": "cryitfjp2345kl05weoybfk9",
+        "name": "Technology",
+        "slug": "technology",
+        "description": "Tech news and tutorials"
+      },
+      "tags": [
+        {
+          "id": "cryitfjp4567no07ygqadhm1",
+          "name": "JavaScript",
+          "slug": "javascript",
+          "description": "JavaScript tutorials"
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "limit": 10,
+    "currentPage": 1,
+    "nextPage": 2,
+    "previousPage": null,
+    "totalPages": 5,
+    "totalItems": 42
+  }
+}
+```
+</ResponseExample>
+
+## Get post by slug or ID
+
+<CodeGroup>
+```bash GET /v1/posts/{identifier}
+curl -X GET "https://api.marblecms.com/v1/posts/my-post-slug" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</CodeGroup>
+
+Retrieve a single post by its ID or slug.
+
+### Path parameters
+
+<ParamField path="identifier" type="string" required>
+  Post ID or slug
+</ParamField>
+
+### Query parameters
+
+<ParamField query="format" type="string" default="html">
+  Content format. Options: `html`, `markdown`
+</ParamField>
+
+<ParamField query="status" type="string" default="published">
+  Filter by post status. Options: `published`, `draft`, `all`
+</ParamField>
+
+### Response
+
+<ResponseField name="post" type="object">
+  Post object with all fields (same structure as list endpoint)
+</ResponseField>
+
+<ResponseExample>
+```json 200
+{
+  "post": {
+    "id": "cryitfjp5678mn09qrstuvwx",
+    "slug": "getting-started-with-nextjs",
+    "title": "Getting Started with Next.js",
+    "content": "<p>Hello world</p>",
+    "description": "A beginner's guide to Next.js",
+    "coverImage": "https://media.marblecms.com/cover.jpg",
+    "featured": false,
+    "publishedAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-16T12:00:00Z",
+    "attribution": null,
+    "authors": [
+      {
+        "id": "cryitfjp1234jl04vdnycek8",
+        "name": "John Doe",
+        "slug": "john-doe",
+        "image": "https://media.marblecms.com/avatar.jpg",
+        "bio": "Technical writer and developer",
+        "role": "Editor",
+        "socials": []
+      }
+    ],
+    "category": {
+      "id": "cryitfjp2345kl05weoybfk9",
+      "name": "Technology",
+      "slug": "technology",
+      "description": "Tech news and tutorials"
+    },
+    "tags": []
+  }
+}
+```
+
+```json 404
+{
+  "error": "Post not found",
+  "message": "The requested post does not exist or does not match the requested status"
+}
+```
+</ResponseExample>
+
+## Create post
+
+<CodeGroup>
+```bash POST /v1/posts
+curl -X POST "https://api.marblecms.com/v1/posts" \
+  -H "Authorization: Bearer YOUR_PRIVATE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Getting Started with Next.js",
+    "slug": "getting-started-with-nextjs",
+    "content": "<p>Hello world</p>",
+    "description": "A beginner's guide to Next.js",
+    "categoryId": "cryitfjp2345kl05weoybfk9",
+    "status": "draft"
+  }'
+```
+</CodeGroup>
+
+Create a new post. Requires a private API key (starts with `msk_`).
+
+### Request body
+
+<ParamField body="title" type="string" required>
+  Post title
+</ParamField>
+
+<ParamField body="slug" type="string" required>
+  URL-friendly slug (must be unique within workspace)
+</ParamField>
+
+<ParamField body="content" type="string" required>
+  Post content in HTML format
+</ParamField>
+
+<ParamField body="description" type="string" required>
+  Post description or excerpt
+</ParamField>
+
+<ParamField body="categoryId" type="string" required>
+  ID of the category to assign this post to
+</ParamField>
+
+<ParamField body="status" type="string" required>
+  Post status. Options: `published`, `draft`
+</ParamField>
+
+<ParamField body="tags" type="array">
+  Array of tag IDs to attach to the post
+</ParamField>
+
+<ParamField body="authors" type="array">
+  Array of author IDs. If omitted, the first workspace author is used.
+</ParamField>
+
+<ParamField body="featured" type="boolean" default="false">
+  Whether the post should be featured
+</ParamField>
+
+<ParamField body="coverImage" type="string">
+  URL to cover image
+</ParamField>
+
+<ParamField body="publishedAt" type="string">
+  ISO 8601 datetime. Defaults to current time if omitted.
+</ParamField>
+
+<ParamField body="attribution" type="object">
+  Attribution to original author when republishing content
+  <Expandable title="Attribution object">
+    <ParamField body="author" type="string" required>
+      Original author name
+    </ParamField>
+    <ParamField body="url" type="string" required>
+      URL to original content
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+### Response
+
+<ResponseField name="post" type="object">
+  Created post summary
+  <Expandable title="Post object">
+    <ResponseField name="id" type="string">
+      Unique post identifier
+    </ResponseField>
+    <ResponseField name="slug" type="string">
+      Post slug
+    </ResponseField>
+    <ResponseField name="title" type="string">
+      Post title
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      Post status
+    </ResponseField>
+    <ResponseField name="featured" type="boolean">
+      Featured status
+    </ResponseField>
+    <ResponseField name="publishedAt" type="string">
+      Published datetime
+    </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      Created datetime
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json 201
+{
+  "post": {
+    "id": "cryitfjp5678mn09qrstuvwx",
+    "slug": "getting-started-with-nextjs",
+    "title": "Getting Started with Next.js",
+    "status": "draft",
+    "featured": false,
+    "publishedAt": "2024-01-15T10:00:00.000Z",
+    "createdAt": "2024-01-15T10:00:00.000Z"
+  }
+}
+```
+
+```json 409
+{
+  "error": "Slug already in use",
+  "message": "A post with this slug already exists in this workspace"
+}
+```
+
+```json 403
+{
+  "error": "Forbidden",
+  "message": "Write operations require a private API key (msk_...). Public keys are read-only."
+}
+```
+</ResponseExample>
+
+## Update post
+
+<CodeGroup>
+```bash PATCH /v1/posts/{identifier}
+curl -X PATCH "https://api.marblecms.com/v1/posts/my-post-slug" \
+  -H "Authorization: Bearer YOUR_PRIVATE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Updated Post Title",
+    "status": "published"
+  }'
+```
+</CodeGroup>
+
+Update an existing post by ID or slug. All fields are optional. Requires a private API key.
+
+### Path parameters
+
+<ParamField path="identifier" type="string" required>
+  Post ID or slug
+</ParamField>
+
+### Request body
+
+All fields are optional. Only provided fields will be updated.
+
+<ParamField body="title" type="string">
+  Post title
+</ParamField>
+
+<ParamField body="slug" type="string">
+  URL-friendly slug (must be unique within workspace)
+</ParamField>
+
+<ParamField body="content" type="string">
+  Post content in HTML format
+</ParamField>
+
+<ParamField body="description" type="string">
+  Post description or excerpt
+</ParamField>
+
+<ParamField body="categoryId" type="string">
+  ID of the category to assign this post to
+</ParamField>
+
+<ParamField body="status" type="string">
+  Post status. Options: `published`, `draft`
+</ParamField>
+
+<ParamField body="tags" type="array">
+  Array of tag IDs. Replaces all existing tags when provided.
+</ParamField>
+
+<ParamField body="authors" type="array">
+  Array of author IDs. Replaces all existing authors when provided.
+</ParamField>
+
+<ParamField body="featured" type="boolean">
+  Whether the post should be featured
+</ParamField>
+
+<ParamField body="coverImage" type="string">
+  URL to cover image
+</ParamField>
+
+<ParamField body="publishedAt" type="string">
+  ISO 8601 datetime
+</ParamField>
+
+<ParamField body="attribution" type="object">
+  Attribution to original author when republishing content
+</ParamField>
+
+### Response
+
+<ResponseField name="post" type="object">
+  Updated post summary
+</ResponseField>
+
+<ResponseExample>
+```json 200
+{
+  "post": {
+    "id": "cryitfjp5678mn09qrstuvwx",
+    "slug": "updated-post-slug",
+    "title": "Updated Post Title",
+    "status": "published",
+    "featured": true,
+    "publishedAt": "2024-02-01T10:00:00.000Z",
+    "updatedAt": "2024-02-01T12:00:00.000Z"
+  }
+}
+```
+
+```json 404
+{
+  "error": "Post not found",
+  "message": "The requested post does not exist"
+}
+```
+</ResponseExample>
+
+## Delete post
+
+<CodeGroup>
+```bash DELETE /v1/posts/{identifier}
+curl -X DELETE "https://api.marblecms.com/v1/posts/my-post-slug" \
+  -H "Authorization: Bearer YOUR_PRIVATE_API_KEY"
+```
+</CodeGroup>
+
+Delete a post by ID or slug. Requires a private API key.
+
+### Path parameters
+
+<ParamField path="identifier" type="string" required>
+  Post ID or slug
+</ParamField>
+
+### Response
+
+<ResponseField name="id" type="string">
+  ID of the deleted post
+</ResponseField>
+
+<ResponseExample>
+```json 200
+{
+  "id": "cryitfjp5678mn09qrstuvwx"
+}
+```
+
+```json 404
+{
+  "error": "Post not found",
+  "message": "The requested post does not exist"
+}
+```
+</ResponseExample>

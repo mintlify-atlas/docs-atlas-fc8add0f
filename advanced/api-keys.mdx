@@ -1,0 +1,186 @@
+---
+title: API keys
+description: Authenticate API requests with public and private API keys
+---
+
+API keys allow you to authenticate requests to the Marble API. Each key has a specific type and can be configured with scopes to control access to different resources.
+
+## Key types
+
+Marble supports two types of API keys:
+
+<CardGroup cols={2}>
+  <Card title="Public keys" icon="globe">
+    Use for client-side applications where the key may be exposed. Public keys have the `mpk_` prefix.
+  </Card>
+  <Card title="Private keys" icon="lock">
+    Use for server-side applications only. Never expose these keys in client-side code. Private keys have the `msk_` prefix.
+  </Card>
+</CardGroup>
+
+<Warning>
+  Private keys (`msk_`) should never be committed to version control or exposed in client-side code. Always use environment variables to store them securely.
+</Warning>
+
+## Creating an API key
+
+Create API keys from the Marble dashboard to authenticate your API requests.
+
+<Steps>
+  <Step title="Navigate to settings">
+    Go to your workspace settings and select the **API Keys** tab.
+  </Step>
+  
+  <Step title="Create new key">
+    Click **Create API Key** and choose the key type (public or private).
+  </Step>
+  
+  <Step title="Configure scopes">
+    Select the scopes your API key needs. See [API scopes](#api-scopes) below for available permissions.
+  </Step>
+  
+  <Step title="Save your key">
+    Copy the API key immediately. You won't be able to see the full key again after closing the dialog.
+  </Step>
+</Steps>
+
+<Note>
+  API keys are hashed using SHA-256 before being stored in the database. The full key is only shown once during creation.
+</Note>
+
+## API scopes
+
+Scopes control what resources your API key can access. You can assign multiple scopes to a single key.
+
+### Available scopes
+
+| Scope | Description |
+|-------|-------------|
+| `posts_read` | Read posts, including drafts and published content |
+| `posts_write` | Create, update, and delete posts |
+| `authors_read` | Read author information |
+| `authors_write` | Create, update, and delete authors |
+| `categories_read` | Read categories |
+| `categories_write` | Create, update, and delete categories |
+| `tags_read` | Read tags |
+| `tags_write` | Create, update, and delete tags |
+| `media_read` | Read media files |
+| `media_write` | Upload and delete media files |
+
+<CodeGroup>
+```bash Read-only access
+curl https://api.marble.so/v1/posts \
+  -H "Authorization: Bearer mpk_abc123..."
+```
+
+```bash Write access
+curl -X POST https://api.marble.so/v1/posts \
+  -H "Authorization: Bearer msk_xyz789..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Hello World",
+    "content": "My first post"
+  }'
+```
+</CodeGroup>
+
+## Rate limiting
+
+API keys are subject to rate limits to ensure fair usage across all workspaces.
+
+### Default limits
+
+- **200 requests per 10 seconds** for authenticated API key requests
+- Rate limits are applied per IP address and API key combination
+- Rate limit headers are included in every response
+
+### Rate limit headers
+
+```http
+X-RateLimit-Limit: 200
+X-RateLimit-Remaining: 195
+X-RateLimit-Reset: 1234567890
+```
+
+| Header | Description |
+|--------|-------------|
+| `X-RateLimit-Limit` | Maximum number of requests allowed in the time window |
+| `X-RateLimit-Remaining` | Number of requests remaining in the current window |
+| `X-RateLimit-Reset` | Unix timestamp when the rate limit resets |
+
+### Custom rate limits
+
+You can configure custom rate limits per API key in the database:
+
+- `rateLimitTimeWindow` - Time window in milliseconds (e.g., 86400000 for 24 hours)
+- `rateLimitMax` - Maximum requests allowed in the time window
+
+When a custom rate limit is set on an API key, it overrides the default limits for that specific key.
+
+<Warning>
+  If you exceed the rate limit, you'll receive a `429 Too Many Requests` response. Implement exponential backoff in your application to handle rate limit errors gracefully.
+</Warning>
+
+## Managing API keys
+
+### Viewing usage
+
+The dashboard displays usage statistics for each API key:
+
+- Total request count
+- Last used timestamp
+- Key type and active scopes
+
+### Rotating keys
+
+To rotate an API key:
+
+<Steps>
+  <Step title="Create new key">
+    Generate a new API key with the same scopes as the old key.
+  </Step>
+  
+  <Step title="Update applications">
+    Update all applications using the old key to use the new key.
+  </Step>
+  
+  <Step title="Monitor usage">
+    Verify the new key is working and the old key is no longer receiving requests.
+  </Step>
+  
+  <Step title="Delete old key">
+    Once confirmed, delete the old API key from the dashboard.
+  </Step>
+</Steps>
+
+### Disabling keys
+
+You can temporarily disable an API key without deleting it:
+
+1. Go to **Settings** > **API Keys**
+2. Toggle the **Enabled** switch for the key
+3. Disabled keys will return a `401 Unauthorized` response
+
+## Best practices
+
+<AccordionGroup>
+  <Accordion title="Use the principle of least privilege">
+    Only grant the scopes your application actually needs. If you only need to read posts, don't grant write access.
+  </Accordion>
+  
+  <Accordion title="Rotate keys regularly">
+    Establish a key rotation schedule (e.g., every 90 days) to minimize the impact of compromised keys.
+  </Accordion>
+  
+  <Accordion title="Use different keys for different environments">
+    Create separate API keys for development, staging, and production environments.
+  </Accordion>
+  
+  <Accordion title="Monitor key usage">
+    Regularly review which keys are active and when they were last used. Delete unused keys.
+  </Accordion>
+  
+  <Accordion title="Store keys securely">
+    Use environment variables or secret management services. Never hardcode keys in your application code.
+  </Accordion>
+</AccordionGroup>

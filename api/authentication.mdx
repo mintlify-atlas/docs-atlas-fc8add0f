@@ -1,0 +1,185 @@
+---
+title: Authentication
+description: Authenticate your API requests using API keys with the Authorization header
+---
+
+The Marble API uses API key authentication to secure access to your workspace data. All requests must include a valid API key.
+
+## API key types
+
+Marble provides two types of API keys:
+
+- **Public keys** (`mpk_...`) - Read-only access, safe to use in client-side applications
+- **Private keys** (`msk_...`) - Full read and write access, should only be used on the server
+
+<Warning>
+  Never expose private API keys in client-side code, public repositories, or browser applications. Always use public keys for client-side requests.
+</Warning>
+
+## Creating an API key
+
+You can create and manage API keys from your workspace settings in the Marble CMS dashboard:
+
+1. Navigate to your workspace settings
+2. Go to the "API Keys" section
+3. Click "Create API Key"
+4. Choose the key type (public or private)
+5. Copy and securely store your API key
+
+<Note>
+  API keys are only shown once during creation. If you lose a key, you'll need to create a new one.
+</Note>
+
+## Authentication methods
+
+You can authenticate requests using either the `Authorization` header or a query parameter.
+
+### Authorization header (recommended)
+
+Include your API key in the `Authorization` header:
+
+```bash
+curl https://api.marblecms.com/v1/posts \
+  -H "Authorization: msk_abc123..."
+```
+
+You can optionally use the `Bearer` prefix:
+
+```bash
+curl https://api.marblecms.com/v1/posts \
+  -H "Authorization: Bearer msk_abc123..."
+```
+
+### Query parameter
+
+Alternatively, pass your API key as a `key` query parameter:
+
+```bash
+curl https://api.marblecms.com/v1/posts?key=msk_abc123...
+```
+
+<Note>
+  Using the `Authorization` header is recommended for better security, especially when using HTTPS.
+</Note>
+
+## API key validation
+
+When you make a request, the API validates your key by:
+
+1. Hashing the provided key
+2. Looking up the key in the database
+3. Checking if the key is enabled
+4. Verifying the key hasn't expired
+
+If validation fails, you'll receive a `401 Unauthorized` response.
+
+## Read vs write operations
+
+Public API keys can only perform `GET` requests. If you attempt a write operation (`POST`, `PUT`, `PATCH`, `DELETE`) with a public key, you'll receive a `403 Forbidden` response:
+
+```json
+{
+  "error": "Forbidden",
+  "message": "Write operations require a private API key (msk_...). Public keys are read-only."
+}
+```
+
+<CodeGroup>
+
+```bash Read with public key (allowed)
+curl https://api.marblecms.com/v1/posts \
+  -H "Authorization: mpk_abc123..."
+```
+
+```bash Write with public key (forbidden)
+curl -X POST https://api.marblecms.com/v1/posts \
+  -H "Authorization: mpk_abc123..." \
+  -H "Content-Type: application/json" \
+  -d '{"title": "My Post"}'
+# Returns 403 Forbidden
+```
+
+```bash Write with private key (allowed)
+curl -X POST https://api.marblecms.com/v1/posts \
+  -H "Authorization: msk_abc123..." \
+  -H "Content-Type: application/json" \
+  -d '{"title": "My Post", "content": "<p>Hello</p>", "slug": "my-post", "categoryId": "cat_123"}'
+```
+
+</CodeGroup>
+
+## Legacy workspace routes
+
+Marble previously supported workspace-based routes with the format `/v1/:workspaceId/*`. These routes are still supported for backward compatibility but are deprecated.
+
+### New API key routes (current)
+
+API key routes automatically determine the workspace from the API key:
+
+```bash
+curl https://api.marblecms.com/v1/posts \
+  -H "Authorization: msk_abc123..."
+```
+
+The workspace is extracted from the API key, and the `workspaceId` is set in the request context.
+
+### Legacy workspace routes (deprecated)
+
+Older routes require the workspace ID in the URL path:
+
+```bash
+# Deprecated format
+curl https://api.marblecms.com/v1/:workspaceId/posts
+```
+
+<Warning>
+  Legacy workspace routes are deprecated and may be removed in a future version. Migrate to API key routes to ensure compatibility.
+</Warning>
+
+## API key security
+
+To keep your API keys secure:
+
+- Store keys in environment variables, not in code
+- Use public keys for client-side applications
+- Rotate keys periodically
+- Disable or delete unused keys
+- Monitor API key usage in your workspace analytics
+
+## Common authentication errors
+
+### 401 Unauthorized - Missing API key
+
+```json
+{
+  "error": "Unauthorized",
+  "message": "API key required. Provide via Authorization header or ?key= query parameter"
+}
+```
+
+### 401 Unauthorized - Invalid API key
+
+```json
+{
+  "error": "Unauthorized",
+  "message": "Invalid API key"
+}
+```
+
+### 401 Unauthorized - Disabled API key
+
+```json
+{
+  "error": "Unauthorized",
+  "message": "API key is disabled"
+}
+```
+
+### 401 Unauthorized - Expired API key
+
+```json
+{
+  "error": "Unauthorized",
+  "message": "API key has expired"
+}
+```

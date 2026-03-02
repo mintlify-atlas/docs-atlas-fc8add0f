@@ -1,0 +1,360 @@
+---
+title: Tags
+description: Manage and retrieve tags for organizing and filtering posts
+---
+
+## List tags
+
+<CodeGroup>
+```bash GET /v1/tags
+curl -X GET "https://api.marblecms.com/v1/tags?limit=10&page=1" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</CodeGroup>
+
+Retrieve a paginated list of all tags.
+
+### Query parameters
+
+<ParamField query="limit" type="integer" default="10">
+  Number of tags per page (1-100)
+</ParamField>
+
+<ParamField query="page" type="integer" default="1">
+  Page number
+</ParamField>
+
+### Response
+
+<ResponseField name="tags" type="array">
+  Array of tag objects
+  <Expandable title="Tag object">
+    <ResponseField name="id" type="string">
+      Unique tag identifier
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Tag name
+    </ResponseField>
+    <ResponseField name="slug" type="string">
+      URL-friendly tag slug
+    </ResponseField>
+    <ResponseField name="description" type="string" nullable>
+      Tag description
+    </ResponseField>
+    <ResponseField name="count" type="object">
+      Post count
+      <Expandable title="Count object">
+        <ResponseField name="posts" type="integer">
+          Number of published posts with this tag
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Pagination metadata
+  <Expandable title="Pagination object">
+    <ResponseField name="limit" type="integer">
+      Items per page
+    </ResponseField>
+    <ResponseField name="currentPage" type="integer">
+      Current page number
+    </ResponseField>
+    <ResponseField name="nextPage" type="integer" nullable>
+      Next page number or null
+    </ResponseField>
+    <ResponseField name="previousPage" type="integer" nullable>
+      Previous page number or null
+    </ResponseField>
+    <ResponseField name="totalPages" type="integer">
+      Total number of pages
+    </ResponseField>
+    <ResponseField name="totalItems" type="integer">
+      Total number of items
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json 200
+{
+  "tags": [
+    {
+      "id": "cryitfjp4567no07ygqadhm1",
+      "name": "JavaScript",
+      "slug": "javascript",
+      "description": "JavaScript tutorials",
+      "count": {
+        "posts": 8
+      }
+    },
+    {
+      "id": "cryitfjp4567no07ygqadhm2",
+      "name": "React",
+      "slug": "react",
+      "description": "React tutorials and guides",
+      "count": {
+        "posts": 5
+      }
+    }
+  ],
+  "pagination": {
+    "limit": 10,
+    "currentPage": 1,
+    "nextPage": null,
+    "previousPage": null,
+    "totalPages": 1,
+    "totalItems": 2
+  }
+}
+```
+</ResponseExample>
+
+## Get tag by slug or ID
+
+<CodeGroup>
+```bash GET /v1/tags/{identifier}
+curl -X GET "https://api.marblecms.com/v1/tags/javascript" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</CodeGroup>
+
+Retrieve a single tag by its ID or slug.
+
+### Path parameters
+
+<ParamField path="identifier" type="string" required>
+  Tag ID or slug
+</ParamField>
+
+### Response
+
+<ResponseField name="tag" type="object">
+  Tag object with all fields
+  <Expandable title="Tag object">
+    <ResponseField name="id" type="string">
+      Tag ID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Tag name
+    </ResponseField>
+    <ResponseField name="slug" type="string">
+      Tag slug
+    </ResponseField>
+    <ResponseField name="description" type="string" nullable>
+      Tag description
+    </ResponseField>
+    <ResponseField name="count" type="object">
+      Post count
+      <Expandable title="Count object">
+        <ResponseField name="posts" type="integer">
+          Number of published posts
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json 200
+{
+  "tag": {
+    "id": "cryitfjp4567no07ygqadhm1",
+    "name": "JavaScript",
+    "slug": "javascript",
+    "description": "JavaScript tutorials",
+    "count": {
+      "posts": 8
+    }
+  }
+}
+```
+
+```json 404
+{
+  "error": "Tag not found",
+  "message": "The requested tag does not exist"
+}
+```
+</ResponseExample>
+
+## Create tag
+
+<CodeGroup>
+```bash POST /v1/tags
+curl -X POST "https://api.marblecms.com/v1/tags" \
+  -H "Authorization: Bearer YOUR_PRIVATE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "JavaScript",
+    "slug": "javascript",
+    "description": "JavaScript tutorials and guides"
+  }'
+```
+</CodeGroup>
+
+Create a new tag. Requires a private API key (starts with `msk_`).
+
+### Request body
+
+<ParamField body="name" type="string" required>
+  Tag name
+</ParamField>
+
+<ParamField body="slug" type="string" required>
+  URL-friendly slug (must be unique within workspace)
+</ParamField>
+
+<ParamField body="description" type="string">
+  Tag description
+</ParamField>
+
+### Response
+
+<ResponseField name="tag" type="object">
+  Created tag
+  <Expandable title="Tag object">
+    <ResponseField name="id" type="string">
+      Tag ID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Tag name
+    </ResponseField>
+    <ResponseField name="slug" type="string">
+      Tag slug
+    </ResponseField>
+    <ResponseField name="description" type="string" nullable>
+      Tag description
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json 201
+{
+  "tag": {
+    "id": "cryitfjp4567no07ygqadhm1",
+    "name": "JavaScript",
+    "slug": "javascript",
+    "description": "JavaScript tutorials and guides"
+  }
+}
+```
+
+```json 409
+{
+  "error": "Slug already in use",
+  "message": "A tag with this slug already exists in this workspace"
+}
+```
+
+```json 403
+{
+  "error": "Forbidden",
+  "message": "Write operations require a private API key (msk_...). Public keys are read-only."
+}
+```
+</ResponseExample>
+
+## Update tag
+
+<CodeGroup>
+```bash PATCH /v1/tags/{identifier}
+curl -X PATCH "https://api.marblecms.com/v1/tags/javascript" \
+  -H "Authorization: Bearer YOUR_PRIVATE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "TypeScript",
+    "description": "TypeScript tutorials and guides"
+  }'
+```
+</CodeGroup>
+
+Update an existing tag by ID or slug. All fields are optional. Requires a private API key.
+
+### Path parameters
+
+<ParamField path="identifier" type="string" required>
+  Tag ID or slug
+</ParamField>
+
+### Request body
+
+All fields are optional. Only provided fields will be updated.
+
+<ParamField body="name" type="string">
+  Tag name
+</ParamField>
+
+<ParamField body="slug" type="string">
+  URL-friendly slug (must be unique within workspace)
+</ParamField>
+
+<ParamField body="description" type="string">
+  Tag description
+</ParamField>
+
+### Response
+
+<ResponseField name="tag" type="object">
+  Updated tag
+</ResponseField>
+
+<ResponseExample>
+```json 200
+{
+  "tag": {
+    "id": "cryitfjp4567no07ygqadhm1",
+    "name": "TypeScript",
+    "slug": "typescript",
+    "description": "TypeScript tutorials and guides"
+  }
+}
+```
+
+```json 404
+{
+  "error": "Tag not found",
+  "message": "The requested tag does not exist"
+}
+```
+</ResponseExample>
+
+## Delete tag
+
+<CodeGroup>
+```bash DELETE /v1/tags/{identifier}
+curl -X DELETE "https://api.marblecms.com/v1/tags/javascript" \
+  -H "Authorization: Bearer YOUR_PRIVATE_API_KEY"
+```
+</CodeGroup>
+
+Delete a tag by ID or slug. Requires a private API key.
+
+### Path parameters
+
+<ParamField path="identifier" type="string" required>
+  Tag ID or slug
+</ParamField>
+
+### Response
+
+<ResponseField name="id" type="string">
+  ID of the deleted tag
+</ResponseField>
+
+<ResponseExample>
+```json 200
+{
+  "id": "cryitfjp4567no07ygqadhm1"
+}
+```
+
+```json 404
+{
+  "error": "Tag not found",
+  "message": "The requested tag does not exist"
+}
+```
+</ResponseExample>

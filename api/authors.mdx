@@ -1,0 +1,450 @@
+---
+title: Authors
+description: Manage and retrieve authors who create posts
+---
+
+## List authors
+
+<CodeGroup>
+```bash GET /v1/authors
+curl -X GET "https://api.marblecms.com/v1/authors?limit=10&page=1" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</CodeGroup>
+
+Retrieve a paginated list of authors who have published posts.
+
+### Query parameters
+
+<ParamField query="limit" type="integer" default="10">
+  Number of authors per page (1-100)
+</ParamField>
+
+<ParamField query="page" type="integer" default="1">
+  Page number
+</ParamField>
+
+### Response
+
+<ResponseField name="authors" type="array">
+  Array of author objects
+  <Expandable title="Author object">
+    <ResponseField name="id" type="string">
+      Unique author identifier
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Author name
+    </ResponseField>
+    <ResponseField name="slug" type="string">
+      URL-friendly author slug
+    </ResponseField>
+    <ResponseField name="image" type="string" nullable>
+      Author avatar URL
+    </ResponseField>
+    <ResponseField name="bio" type="string" nullable>
+      Author bio
+    </ResponseField>
+    <ResponseField name="role" type="string" nullable>
+      Author role or job title
+    </ResponseField>
+    <ResponseField name="socials" type="array">
+      Social media links
+      <Expandable title="Social object">
+        <ResponseField name="url" type="string">
+          Social media URL
+        </ResponseField>
+        <ResponseField name="platform" type="string">
+          Platform name (e.g., twitter, github, linkedin)
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="count" type="object">
+      Post count
+      <Expandable title="Count object">
+        <ResponseField name="posts" type="integer">
+          Number of published posts by this author
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Pagination metadata
+  <Expandable title="Pagination object">
+    <ResponseField name="limit" type="integer">
+      Items per page
+    </ResponseField>
+    <ResponseField name="currentPage" type="integer">
+      Current page number
+    </ResponseField>
+    <ResponseField name="nextPage" type="integer" nullable>
+      Next page number or null
+    </ResponseField>
+    <ResponseField name="previousPage" type="integer" nullable>
+      Previous page number or null
+    </ResponseField>
+    <ResponseField name="totalPages" type="integer">
+      Total number of pages
+    </ResponseField>
+    <ResponseField name="totalItems" type="integer">
+      Total number of items
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json 200
+{
+  "authors": [
+    {
+      "id": "cryitfjp3456lm06xfpzcgl0",
+      "name": "John Doe",
+      "slug": "john-doe",
+      "image": "https://media.marblecms.com/avatar.jpg",
+      "bio": "Technical writer and developer",
+      "role": "Editor",
+      "socials": [
+        {
+          "url": "https://twitter.com/johndoe",
+          "platform": "twitter"
+        }
+      ],
+      "count": {
+        "posts": 12
+      }
+    }
+  ],
+  "pagination": {
+    "limit": 10,
+    "currentPage": 1,
+    "nextPage": null,
+    "previousPage": null,
+    "totalPages": 1,
+    "totalItems": 1
+  }
+}
+```
+</ResponseExample>
+
+## Get author by slug or ID
+
+<CodeGroup>
+```bash GET /v1/authors/{identifier}
+curl -X GET "https://api.marblecms.com/v1/authors/john-doe" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+</CodeGroup>
+
+Retrieve a single author by their ID or slug.
+
+### Path parameters
+
+<ParamField path="identifier" type="string" required>
+  Author ID or slug
+</ParamField>
+
+### Response
+
+<ResponseField name="author" type="object">
+  Author object with all fields
+  <Expandable title="Author object">
+    <ResponseField name="id" type="string">
+      Author ID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Author name
+    </ResponseField>
+    <ResponseField name="slug" type="string">
+      Author slug
+    </ResponseField>
+    <ResponseField name="image" type="string" nullable>
+      Author avatar URL
+    </ResponseField>
+    <ResponseField name="bio" type="string" nullable>
+      Author bio
+    </ResponseField>
+    <ResponseField name="role" type="string" nullable>
+      Author role
+    </ResponseField>
+    <ResponseField name="socials" type="array">
+      Social media links
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json 200
+{
+  "author": {
+    "id": "cryitfjp3456lm06xfpzcgl0",
+    "name": "John Doe",
+    "slug": "john-doe",
+    "image": "https://media.marblecms.com/avatar.jpg",
+    "bio": "Technical writer and developer",
+    "role": "Editor",
+    "socials": [
+      {
+        "url": "https://twitter.com/johndoe",
+        "platform": "twitter"
+      }
+    ]
+  }
+}
+```
+
+```json 404
+{
+  "error": "Author not found",
+  "message": "The requested author does not exist"
+}
+```
+</ResponseExample>
+
+## Create author
+
+<CodeGroup>
+```bash POST /v1/authors
+curl -X POST "https://api.marblecms.com/v1/authors" \
+  -H "Authorization: Bearer YOUR_PRIVATE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe",
+    "slug": "john-doe",
+    "bio": "Technical writer and developer",
+    "role": "Editor",
+    "image": "https://media.marblecms.com/avatar.jpg",
+    "socials": [
+      {
+        "platform": "x",
+        "url": "https://x.com/johndoe"
+      }
+    ]
+  }'
+```
+</CodeGroup>
+
+Create a new author. Requires a private API key (starts with `msk_`). The Hobby plan is limited to 1 author.
+
+### Request body
+
+<ParamField body="name" type="string" required>
+  Author name
+</ParamField>
+
+<ParamField body="slug" type="string" required>
+  URL-friendly slug (must be unique within workspace)
+</ParamField>
+
+<ParamField body="bio" type="string">
+  Author bio or description
+</ParamField>
+
+<ParamField body="role" type="string">
+  Author role or job title
+</ParamField>
+
+<ParamField body="email" type="string">
+  Author email address
+</ParamField>
+
+<ParamField body="image" type="string">
+  URL to author avatar image
+</ParamField>
+
+<ParamField body="socials" type="array">
+  Social media links
+  <Expandable title="Social object">
+    <ParamField body="platform" type="string" required>
+      Platform name. Options: `x`, `twitter`, `github`, `facebook`, `instagram`, `youtube`, `tiktok`, `linkedin`, `website`, `onlyfans`, `discord`, `bluesky`
+    </ParamField>
+    <ParamField body="url" type="string" required>
+      URL to social media profile
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+### Response
+
+<ResponseField name="author" type="object">
+  Created author
+  <Expandable title="Author object">
+    <ResponseField name="id" type="string">
+      Author ID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Author name
+    </ResponseField>
+    <ResponseField name="slug" type="string">
+      Author slug
+    </ResponseField>
+    <ResponseField name="bio" type="string" nullable>
+      Author bio
+    </ResponseField>
+    <ResponseField name="role" type="string" nullable>
+      Author role
+    </ResponseField>
+    <ResponseField name="image" type="string" nullable>
+      Author avatar URL
+    </ResponseField>
+    <ResponseField name="socials" type="array">
+      Social media links
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json 201
+{
+  "author": {
+    "id": "cryitfjp3456lm06xfpzcgl0",
+    "name": "John Doe",
+    "slug": "john-doe",
+    "bio": "Technical writer and developer",
+    "role": "Editor",
+    "image": "https://media.marblecms.com/avatar.jpg",
+    "socials": [
+      {
+        "url": "https://x.com/johndoe",
+        "platform": "x"
+      }
+    ]
+  }
+}
+```
+
+```json 403
+{
+  "error": "Author limit reached",
+  "message": "Hobby plan is limited to 1 author. Upgrade to Pro to create more."
+}
+```
+
+```json 409
+{
+  "error": "Slug already in use",
+  "message": "An author with this slug already exists in this workspace"
+}
+```
+</ResponseExample>
+
+## Update author
+
+<CodeGroup>
+```bash PATCH /v1/authors/{identifier}
+curl -X PATCH "https://api.marblecms.com/v1/authors/john-doe" \
+  -H "Authorization: Bearer YOUR_PRIVATE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "bio": "Updated bio",
+    "role": "Senior Editor"
+  }'
+```
+</CodeGroup>
+
+Update an existing author by ID or slug. All fields are optional. Requires a private API key.
+
+### Path parameters
+
+<ParamField path="identifier" type="string" required>
+  Author ID or slug
+</ParamField>
+
+### Request body
+
+All fields are optional. Only provided fields will be updated.
+
+<ParamField body="name" type="string">
+  Author name
+</ParamField>
+
+<ParamField body="slug" type="string">
+  URL-friendly slug (must be unique within workspace)
+</ParamField>
+
+<ParamField body="bio" type="string">
+  Author bio
+</ParamField>
+
+<ParamField body="role" type="string">
+  Author role
+</ParamField>
+
+<ParamField body="email" type="string">
+  Author email
+</ParamField>
+
+<ParamField body="image" type="string">
+  Author avatar URL
+</ParamField>
+
+<ParamField body="socials" type="array">
+  Social media links. Replaces all existing socials when provided.
+</ParamField>
+
+### Response
+
+<ResponseField name="author" type="object">
+  Updated author
+</ResponseField>
+
+<ResponseExample>
+```json 200
+{
+  "author": {
+    "id": "cryitfjp3456lm06xfpzcgl0",
+    "name": "John Doe",
+    "slug": "john-doe",
+    "bio": "Updated bio",
+    "role": "Senior Editor",
+    "image": "https://media.marblecms.com/avatar.jpg",
+    "socials": []
+  }
+}
+```
+
+```json 404
+{
+  "error": "Author not found",
+  "message": "The requested author does not exist"
+}
+```
+</ResponseExample>
+
+## Delete author
+
+<CodeGroup>
+```bash DELETE /v1/authors/{identifier}
+curl -X DELETE "https://api.marblecms.com/v1/authors/john-doe" \
+  -H "Authorization: Bearer YOUR_PRIVATE_API_KEY"
+```
+</CodeGroup>
+
+Delete an author by ID or slug. Requires a private API key.
+
+### Path parameters
+
+<ParamField path="identifier" type="string" required>
+  Author ID or slug
+</ParamField>
+
+### Response
+
+<ResponseField name="id" type="string">
+  ID of the deleted author
+</ResponseField>
+
+<ResponseExample>
+```json 200
+{
+  "id": "cryitfjp3456lm06xfpzcgl0"
+}
+```
+
+```json 404
+{
+  "error": "Author not found",
+  "message": "The requested author does not exist"
+}
+```
+</ResponseExample>

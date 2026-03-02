@@ -1,0 +1,501 @@
+---
+title: Installation
+description: Set up Marble locally for self-hosting and development
+---
+
+# Installation
+
+This guide will walk you through setting up Marble locally for development or self-hosting. Marble is a monorepo built with Turborepo and pnpm workspaces.
+
+## Prerequisites
+
+Before you start, ensure you have the following installed:
+
+- **Node.js** ≥ 20.x
+- **pnpm** ≥ 10.x (install with `npm i -g pnpm`)
+- **PostgreSQL** database (Neon or local Docker)
+- **Redis** database (Upstash recommended)
+- **Google** and **GitHub** OAuth apps (for authentication)
+- **Cloudflare** account with R2 enabled (for media uploads)
+
+### Optional services
+
+- **Polar** sandbox account (for testing payments)
+- **QStash** (for reliable webhook delivery)
+
+## Clone the repository
+
+<Steps>
+  <Step title="Fork and clone">
+    Fork the [Marble repository](https://github.com/usemarble/marble) and clone it to your local machine:
+    
+    ```bash
+    git clone https://github.com/YOUR-USERNAME/marble.git
+    cd marble
+    ```
+  </Step>
+  
+  <Step title="Add upstream remote">
+    Add the original repository as upstream to keep your fork in sync:
+    
+    ```bash
+    git remote add upstream https://github.com/usemarble/marble.git
+    ```
+  </Step>
+</Steps>
+
+## Install dependencies
+
+Install all dependencies using pnpm:
+
+```bash
+pnpm install
+```
+
+This will install dependencies for all apps and packages in the monorepo.
+
+## Configure environment variables
+
+Each app requires its own environment variables. Copy the example files:
+
+```bash
+cp apps/api/.dev.vars.example apps/api/.dev.vars
+cp apps/cms/.env.example apps/cms/.env
+cp apps/web/.env.example apps/web/.env
+cp packages/db/.env.example packages/db/.env
+```
+
+### Database configuration
+
+You can use either Neon (hosted) or Docker (local) for your PostgreSQL database.
+
+<Tabs>
+  <Tab title="Neon (hosted)">
+    <Steps>
+      <Step title="Create a Neon project">
+        1. Go to [Neon](https://neon.tech) and create a new project
+        2. Copy your connection string (ensure it includes `sslmode=require`)
+      </Step>
+      
+      <Step title="Add to environment files">
+        Add the connection string to these files:
+        
+        ```bash apps/api/.dev.vars
+        DATABASE_URL="postgresql://<user>:<password>@<host>/<db>?sslmode=require"
+        ```
+        
+        ```bash apps/cms/.env
+        DATABASE_URL="postgresql://<user>:<password>@<host>/<db>?sslmode=require"
+        ```
+        
+        ```bash packages/db/.env
+        DATABASE_URL="postgresql://<user>:<password>@<host>/<db>?sslmode=require"
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Docker (local)">
+    <Steps>
+      <Step title="Start PostgreSQL">
+        Start a local PostgreSQL instance using Docker:
+        
+        ```bash
+        pnpm docker:up
+        ```
+        
+        Wait for the database to be ready:
+        
+        ```bash
+        pnpm docker:logs
+        ```
+        
+        Look for "database system is ready to accept connections"
+      </Step>
+      
+      <Step title="Add to environment files">
+        Use the local connection string in these files:
+        
+        ```bash apps/api/.dev.vars
+        DATABASE_URL=postgresql://usemarble:justusemarble@localhost:5432/marble
+        ```
+        
+        ```bash apps/cms/.env
+        DATABASE_URL=postgresql://usemarble:justusemarble@localhost:5432/marble
+        ```
+        
+        ```bash packages/db/.env
+        DATABASE_URL=postgresql://usemarble:justusemarble@localhost:5432/marble
+        ```
+        
+        <Warning>
+          These credentials are for local development only. Never use them in production.
+        </Warning>
+      </Step>
+    </Steps>
+    
+    ### Docker commands
+    
+    ```bash
+    pnpm docker:up      # Start PostgreSQL
+    pnpm docker:down    # Stop containers
+    pnpm docker:clean   # Stop and remove volumes (destroys data)
+    pnpm docker:logs    # Follow container logs
+    pnpm docker:ps      # Show container status
+    ```
+  </Tab>
+</Tabs>
+
+### Run database migrations
+
+After configuring your database, run migrations to set up the schema:
+
+```bash
+pnpm db:migrate
+```
+
+This will create all necessary tables and relationships.
+
+## Set up authentication
+
+### Better Auth secret
+
+Generate a secret for Better Auth:
+
+```bash
+openssl rand -base64 32
+```
+
+Add to `apps/cms/.env`:
+
+```bash apps/cms/.env
+BETTER_AUTH_SECRET=your-generated-secret
+BETTER_AUTH_URL=http://localhost:3000
+```
+
+### Google OAuth
+
+<Steps>
+  <Step title="Create OAuth app">
+    1. Go to [Google Cloud Console](https://console.cloud.google.com)
+    2. Create a new project or select an existing one
+    3. Enable Google+ API
+    4. Go to **Credentials** → **Create Credentials** → **OAuth client ID**
+    5. Set application type to **Web application**
+  </Step>
+  
+  <Step title="Configure redirect URIs">
+    Add these authorized redirect URIs:
+    
+    - `http://localhost:3000/api/auth/callback/google`
+  </Step>
+  
+  <Step title="Add credentials">
+    Add to `apps/cms/.env`:
+    
+    ```bash apps/cms/.env
+    GOOGLE_CLIENT_ID=your-client-id
+    GOOGLE_CLIENT_SECRET=your-client-secret
+    ```
+  </Step>
+</Steps>
+
+See the [Better Auth Google documentation](https://www.better-auth.com/docs/authentication/google) for detailed setup instructions.
+
+### GitHub OAuth
+
+<Steps>
+  <Step title="Create OAuth app">
+    1. Go to [GitHub Settings](https://github.com/settings/developers)
+    2. Click **New OAuth App**
+    3. Fill in the application details:
+       - **Application name**: Marble Local
+       - **Homepage URL**: `http://localhost:3000`
+       - **Authorization callback URL**: `http://localhost:3000/api/auth/callback/github`
+  </Step>
+  
+  <Step title="Add credentials">
+    Add to `apps/cms/.env`:
+    
+    ```bash apps/cms/.env
+    GITHUB_ID=your-github-client-id
+    GITHUB_SECRET=your-github-client-secret
+    ```
+  </Step>
+</Steps>
+
+See the [Better Auth GitHub documentation](https://www.better-auth.com/docs/authentication/github#get-your-github-credentials) for detailed setup instructions.
+
+## Set up Redis (Upstash)
+
+Marble uses Redis for rate limiting, caching, and session storage.
+
+<Steps>
+  <Step title="Create Redis database">
+    1. Go to [Upstash Console](https://console.upstash.com)
+    2. Click **Create Database**
+    3. Name it `marble-redis`
+    4. Select a region close to your deployment
+    5. Choose **Regional** (free tier)
+  </Step>
+  
+  <Step title="Copy credentials">
+    From the database details page, copy:
+    
+    - **UPSTASH_REDIS_REST_URL**
+    - **UPSTASH_REDIS_REST_TOKEN**
+  </Step>
+  
+  <Step title="Add to environment files">
+    ```bash apps/api/.dev.vars
+    REDIS_URL=your-upstash-redis-rest-url
+    REDIS_TOKEN=your-upstash-redis-rest-token
+    ```
+    
+    ```bash apps/cms/.env
+    REDIS_URL=your-upstash-redis-rest-url
+    REDIS_TOKEN=your-upstash-redis-rest-token
+    ```
+  </Step>
+</Steps>
+
+## Set up Cloudflare R2
+
+Cloudflare R2 is used for media uploads and storage.
+
+<Steps>
+  <Step title="Create R2 bucket">
+    1. Go to your [Cloudflare dashboard](https://dash.cloudflare.com)
+    2. Navigate to **R2** from the sidebar
+    3. Click **Create Bucket**
+    4. Name it `marble-media`
+    5. Click **Create**
+  </Step>
+  
+  <Step title="Enable public access">
+    1. Go to the bucket **Settings** tab
+    2. Enable **Public Development URL**
+    3. Copy the public URL
+  </Step>
+  
+  <Step title="Create API token">
+    1. Go back to R2 overview
+    2. Click **Manage R2 API Tokens**
+    3. Click **Create API Token**
+    4. Select **Admin Read & Write** permissions
+    5. Click **Create API Token**
+    6. Copy the **Access Key ID**, **Secret Access Key**, and **Endpoint**
+  </Step>
+  
+  <Step title="Add to environment file">
+    ```bash apps/cms/.env
+    CLOUDFLARE_BUCKET_NAME=marble-media
+    CLOUDFLARE_PUBLIC_URL=your-public-url
+    CLOUDFLARE_S3_ENDPOINT=your-s3-endpoint
+    CLOUDFLARE_ACCESS_KEY_ID=your-access-key-id
+    CLOUDFLARE_SECRET_ACCESS_KEY=your-secret-access-key
+    ```
+  </Step>
+</Steps>
+
+## Set up system secret
+
+The system secret is used for internal API communication between the CMS and API.
+
+```bash
+# Generate a secure random secret
+openssl rand -base64 32
+```
+
+Add the same value to both files:
+
+```bash apps/api/.dev.vars
+SYSTEM_SECRET=your-system-secret
+```
+
+```bash apps/cms/.env
+SYSTEM_SECRET=your-system-secret
+MARBLE_API_URL=http://localhost:8787
+```
+
+## Optional: Set up QStash
+
+QStash provides reliable webhook delivery with automatic retries.
+
+<Steps>
+  <Step title="Enable QStash">
+    1. Go to [Upstash Console](https://console.upstash.com)
+    2. Click **QStash** in the sidebar
+    3. Click **Enable QStash** if not already enabled
+  </Step>
+  
+  <Step title="Get signing key">
+    1. Scroll to **Current Signing Keys**
+    2. Copy the signing key token
+  </Step>
+  
+  <Step title="Add to environment file">
+    ```bash apps/cms/.env
+    QSTASH_TOKEN=your-qstash-token
+    ```
+  </Step>
+</Steps>
+
+## Start the development servers
+
+### Start all apps
+
+Run all apps (API, CMS, and Web) simultaneously:
+
+```bash
+pnpm dev
+```
+
+This will start:
+- **API**: `http://localhost:8787`
+- **CMS**: `http://localhost:3000`
+- **Web**: `http://localhost:4321`
+
+### Start individual apps
+
+Or start apps individually:
+
+<CodeGroup>
+```bash CMS Dashboard
+pnpm cms:dev
+# Runs on http://localhost:3000
+```
+
+```bash API
+pnpm api:dev
+# Runs on http://localhost:8787
+```
+
+```bash Marketing Site
+pnpm web:dev
+# Runs on http://localhost:4321
+```
+</CodeGroup>
+
+## Database commands
+
+```bash
+pnpm db:generate  # Generate Prisma client
+pnpm db:migrate   # Create and apply migrations (dev)
+pnpm db:deploy    # Apply migrations (production)
+pnpm db:push      # Push schema changes without migration
+pnpm db:studio    # Open Prisma Studio (database GUI)
+```
+
+## Build for production
+
+Build all apps and packages:
+
+```bash
+pnpm build
+```
+
+This runs the Turborepo build pipeline and compiles all TypeScript code.
+
+## Code quality
+
+Marble uses ultracite (Biome) for linting and formatting:
+
+```bash
+pnpm format  # Auto-fix issues
+pnpm lint    # Check for issues without fixing
+```
+
+<Note>
+  The project enforces strict code quality rules. Run `pnpm format` before committing to ensure your code passes CI checks.
+</Note>
+
+## Repository structure
+
+```text
+marble/
+├── apps/
+│   ├── api/          # Hono REST API (Cloudflare Workers)
+│   ├── cms/          # Next.js 16 dashboard (React 19)
+│   └── web/          # Astro marketing site
+├── packages/
+│   ├── db/           # Prisma schema + client
+│   ├── editor/       # Tiptap-based rich text editor
+│   ├── email/        # Email templates
+│   ├── parser/       # Content parsing utilities
+│   ├── ui/           # shadcn/ui components
+│   ├── utils/        # Shared utilities
+│   └── tsconfig/     # Shared TypeScript configs
+├── package.json      # Root package.json
+├── pnpm-workspace.yaml
+├── turbo.json        # Turborepo configuration
+└── docker-compose.yml
+```
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Contributing" icon="code-pull-request" href="/contributing">
+    Learn how to contribute to Marble
+  </Card>
+  
+  <Card title="API Reference" icon="book" href="/api-reference">
+    Explore the REST API endpoints
+  </Card>
+  
+  <Card title="Deployment" icon="rocket" href="/deployment">
+    Deploy Marble to production
+  </Card>
+  
+  <Card title="Architecture" icon="sitemap" href="/architecture">
+    Deep dive into Marble's architecture
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+### Prisma client issues
+
+If you encounter Prisma client errors:
+
+```bash
+pnpm db:generate
+pnpm build
+```
+
+### Port conflicts
+
+If port 5432 is already in use by another PostgreSQL instance:
+
+1. Stop the existing instance
+2. Or modify `docker-compose.yml` to use a different port:
+
+```yaml docker-compose.yml
+ports:
+  - "5433:5432"  # Map to 5433 instead
+```
+
+Then update `DATABASE_URL` to use `localhost:5433`.
+
+### Type errors after schema changes
+
+After modifying the Prisma schema:
+
+```bash
+pnpm db:generate
+pnpm build
+```
+
+### Authentication failures
+
+Ensure `SYSTEM_SECRET` matches in both:
+- `apps/api/.dev.vars`
+- `apps/cms/.env`
+
+## Getting help
+
+If you run into issues:
+
+- Check the [Contributing Guide](https://github.com/usemarble/marble/blob/main/.github/CONTRIBUTING.md)
+- Join our [Discord](https://discord.gg/gU44Pmwqkx)
+- Open an issue on [GitHub](https://github.com/usemarble/marble/issues)

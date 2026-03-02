@@ -1,0 +1,411 @@
+---
+title: Webhooks
+description: Receive real-time notifications when events occur in your workspace
+---
+
+Webhooks allow you to receive HTTP notifications when specific events occur in your Marble workspace. You can use webhooks to integrate Marble with external services, trigger automated workflows, or sync data to other systems.
+
+## How webhooks work
+
+When an event occurs in Marble (like publishing a post), Marble sends an HTTP POST request to your configured webhook endpoint with details about the event.
+
+<Steps>
+  <Step title="Event occurs">
+    An action happens in Marble, such as publishing a post or uploading media.
+  </Step>
+  
+  <Step title="Webhook triggered">
+    Marble identifies all webhooks subscribed to that event type.
+  </Step>
+  
+  <Step title="Payload formatted">
+    The event data is formatted according to your chosen format (JSON, Discord, or Slack).
+  </Step>
+  
+  <Step title="Request sent">
+    Marble sends an HTTP POST request to your endpoint with the formatted payload.
+  </Step>
+  
+  <Step title="Verification">
+    Your server verifies the webhook signature to ensure the request came from Marble.
+  </Step>
+</Steps>
+
+## Webhook events
+
+Marble supports the following webhook events:
+
+### Post events
+
+| Event | Description |
+|-------|-------------|
+| `post_published` | Triggered when a post is published |
+| `post_updated` | Triggered when a published post is updated |
+| `post_deleted` | Triggered when a post is deleted |
+
+### Category events
+
+| Event | Description |
+|-------|-------------|
+| `category_created` | Triggered when a new category is created |
+| `category_updated` | Triggered when a category is updated |
+| `category_deleted` | Triggered when a category is deleted |
+
+### Tag events
+
+| Event | Description |
+|-------|-------------|
+| `tag_created` | Triggered when a new tag is created |
+| `tag_updated` | Triggered when a tag is updated |
+| `tag_deleted` | Triggered when a tag is deleted |
+
+### Media events
+
+| Event | Description |
+|-------|-------------|
+| `media_uploaded` | Triggered when media is uploaded |
+| `media_updated` | Triggered when media metadata is updated |
+| `media_deleted` | Triggered when media is deleted |
+
+## Payload formats
+
+Marble supports three payload formats to match your integration needs:
+
+<CardGroup cols={3}>
+  <Card title="JSON" icon="code">
+    Standard JSON format for custom integrations. Includes full event data and HMAC signature for verification.
+  </Card>
+  <Card title="Discord" icon="discord">
+    Formatted for Discord webhooks. Sends rich embeds with event information directly to Discord channels.
+  </Card>
+  <Card title="Slack" icon="slack">
+    Formatted for Slack webhooks. Sends formatted messages to Slack channels with event details.
+  </Card>
+</CardGroup>
+
+### JSON format
+
+The standard JSON payload includes the event type and associated data:
+
+<CodeGroup>
+```json post.published
+{
+  "event": "post.published",
+  "data": {
+    "id": "clx123abc",
+    "title": "Getting Started with Marble",
+    "slug": "getting-started",
+    "userId": "user_456def"
+  }
+}
+```
+
+```json media.uploaded
+{
+  "event": "media.uploaded",
+  "data": {
+    "id": "clx789ghi",
+    "name": "hero-image.png",
+    "userId": "user_456def",
+    "size": 245760,
+    "type": "image"
+  }
+}
+```
+
+```json tag.created
+{
+  "event": "tag.created",
+  "data": {
+    "id": "clx999jkl",
+    "slug": "tutorials",
+    "userId": "user_456def"
+  }
+}
+```
+</CodeGroup>
+
+### Discord format
+
+Discord webhooks must use official Discord webhook URLs:
+
+- `discord.com`
+- `discordapp.com`
+
+Marble automatically formats events into Discord embeds with relevant information and color coding.
+
+### Slack format
+
+Slack webhooks must use the official Slack webhook domain:
+
+- `hooks.slack.com`
+
+Events are formatted as Slack block messages with structured information.
+
+## Creating a webhook
+
+Set up webhooks from your workspace settings.
+
+<Steps>
+  <Step title="Navigate to webhooks">
+    Go to **Settings** > **Webhooks** in your workspace.
+  </Step>
+  
+  <Step title="Create new webhook">
+    Click **Create Webhook** and provide a name for identification.
+  </Step>
+  
+  <Step title="Configure endpoint">
+    Enter your webhook URL. Must use HTTPS for security.
+  </Step>
+  
+  <Step title="Select events">
+    Choose which events should trigger this webhook. You can select multiple events.
+  </Step>
+  
+  <Step title="Choose format">
+    Select the payload format: JSON, Discord, or Slack.
+  </Step>
+  
+  <Step title="Save and test">
+    Save the webhook. A secret key is automatically generated for signature verification.
+  </Step>
+</Steps>
+
+<Warning>
+  Webhook endpoints must use HTTPS. HTTP endpoints are not supported for security reasons.
+</Warning>
+
+## Verifying webhooks
+
+For JSON webhooks, Marble signs each request using HMAC SHA-256 to verify authenticity.
+
+### Signature verification
+
+Every JSON webhook request includes a signature in the `X-Webhook-Signature` header:
+
+```
+X-Webhook-Signature: sha256=abc123def456...
+```
+
+To verify the signature:
+
+<CodeGroup>
+```javascript Node.js
+import { createHmac, timingSafeEqual } from 'crypto';
+
+function verifyWebhook(payload, signature, secret) {
+  // Extract the signature from the header
+  const match = signature.match(/^sha256=(.+)$/);
+  if (!match) {
+    throw new Error('Invalid signature format');
+  }
+  
+  const expectedSignature = match[1];
+  
+  // Compute the HMAC of the payload
+  const computedSignature = createHmac('sha256', secret)
+    .update(payload)
+    .digest('hex');
+  
+  // Use timing-safe comparison
+  const expectedBuffer = Buffer.from(expectedSignature, 'hex');
+  const computedBuffer = Buffer.from(computedSignature, 'hex');
+  
+  if (expectedBuffer.length !== computedBuffer.length) {
+    return false;
+  }
+  
+  return timingSafeEqual(expectedBuffer, computedBuffer);
+}
+```
+
+```python Python
+import hmac
+import hashlib
+import re
+
+def verify_webhook(payload: str, signature: str, secret: str) -> bool:
+    # Extract signature from header
+    match = re.match(r'^sha256=(.+)$', signature)
+    if not match:
+        raise ValueError('Invalid signature format')
+    
+    expected_signature = match.group(1)
+    
+    # Compute HMAC
+    computed_signature = hmac.new(
+        secret.encode('utf-8'),
+        payload.encode('utf-8'),
+        hashlib.sha256
+    ).hexdigest()
+    
+    # Constant-time comparison
+    return hmac.compare_digest(expected_signature, computed_signature)
+```
+
+```go Go
+import (
+    "crypto/hmac"
+    "crypto/sha256"
+    "encoding/hex"
+    "regexp"
+    "strings"
+)
+
+func verifyWebhook(payload, signature, secret string) (bool, error) {
+    // Extract signature
+    re := regexp.MustCompile(`^sha256=(.+)$`)
+    matches := re.FindStringSubmatch(signature)
+    if matches == nil {
+        return false, errors.New("invalid signature format")
+    }
+    
+    expectedSignature := matches[1]
+    
+    // Compute HMAC
+    mac := hmac.New(sha256.New, []byte(secret))
+    mac.Write([]byte(payload))
+    computedSignature := hex.EncodeToString(mac.Sum(nil))
+    
+    // Constant-time comparison
+    return hmac.Equal(
+        []byte(expectedSignature),
+        []byte(computedSignature),
+    ), nil
+}
+```
+</CodeGroup>
+
+<Note>
+  Always use constant-time comparison functions to prevent timing attacks when verifying signatures.
+</Note>
+
+## Webhook delivery
+
+Marble uses QStash for reliable webhook delivery with automatic retries.
+
+### Delivery guarantees
+
+- Webhooks are delivered asynchronously after the event occurs
+- Failed deliveries are automatically retried with exponential backoff
+- Default retry count: 3 attempts
+- QStash ensures at-least-once delivery
+
+### Handling retries
+
+Your webhook endpoint should:
+
+1. Respond with status code `200-299` to indicate success
+2. Be idempotent to handle duplicate deliveries
+3. Return errors quickly (within 30 seconds)
+4. Process the webhook asynchronously if it requires long-running tasks
+
+<CodeGroup>
+```javascript Express.js example
+app.post('/webhooks/marble', express.raw({ type: 'application/json' }), (req, res) => {
+  const signature = req.headers['x-webhook-signature'];
+  const payload = req.body.toString('utf8');
+  
+  // Verify signature
+  if (!verifyWebhook(payload, signature, process.env.WEBHOOK_SECRET)) {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+  
+  // Respond immediately
+  res.status(200).json({ received: true });
+  
+  // Process asynchronously
+  const event = JSON.parse(payload);
+  processWebhook(event).catch(console.error);
+});
+```
+
+```python FastAPI example
+from fastapi import FastAPI, Request, HTTPException
+import asyncio
+
+app = FastAPI()
+
+@app.post("/webhooks/marble")
+async def handle_webhook(request: Request):
+    signature = request.headers.get('x-webhook-signature')
+    payload = await request.body()
+    
+    # Verify signature
+    if not verify_webhook(payload.decode(), signature, WEBHOOK_SECRET):
+        raise HTTPException(status_code=401, detail="Invalid signature")
+    
+    # Parse event
+    event = await request.json()
+    
+    # Process asynchronously
+    asyncio.create_task(process_webhook(event))
+    
+    # Respond immediately
+    return {"received": True}
+```
+</CodeGroup>
+
+## Managing webhooks
+
+### Disabling webhooks
+
+You can temporarily disable a webhook without deleting it:
+
+1. Go to **Settings** > **Webhooks**
+2. Toggle the **Enabled** switch
+3. Disabled webhooks will not receive events
+
+### Updating webhooks
+
+To update a webhook:
+
+- Change the endpoint URL
+- Add or remove subscribed events
+- Switch between payload formats
+- The webhook secret remains the same unless you regenerate it
+
+### Debugging webhooks
+
+If webhooks aren't being delivered:
+
+<AccordionGroup>
+  <Accordion title="Check endpoint availability">
+    Ensure your webhook endpoint is publicly accessible and responds within 30 seconds.
+  </Accordion>
+  
+  <Accordion title="Verify HTTPS">
+    Webhook URLs must use HTTPS. HTTP endpoints are rejected.
+  </Accordion>
+  
+  <Accordion title="Review event subscriptions">
+    Confirm the webhook is subscribed to the events you expect to receive.
+  </Accordion>
+  
+  <Accordion title="Check webhook status">
+    Ensure the webhook is enabled in your settings.
+  </Accordion>
+  
+  <Accordion title="Validate signature verification">
+    Ensure your signature verification logic matches the examples above.
+  </Accordion>
+</AccordionGroup>
+
+## Best practices
+
+<Card title="Respond quickly" icon="bolt">
+  Always return a 200 response immediately. Process the webhook data asynchronously to avoid timeouts.
+</Card>
+
+<Card title="Implement idempotency" icon="repeat">
+  Store event IDs and skip processing duplicate events. QStash guarantees at-least-once delivery, which may result in duplicates.
+</Card>
+
+<Card title="Monitor failures" icon="chart-line">
+  Set up monitoring to track webhook delivery failures and investigate issues promptly.
+</Card>
+
+<Card title="Use separate endpoints" icon="split">
+  Consider using different webhook endpoints for different event types to simplify processing logic.
+</Card>

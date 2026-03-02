@@ -1,0 +1,518 @@
+---
+title: Self-hosting
+description: Deploy Marble to your own infrastructure with Cloudflare Workers, Vercel, and Neon
+---
+
+Marble is designed to be self-hosted on modern serverless infrastructure. This guide covers deploying Marble's Turborepo monorepo to production.
+
+## Architecture overview
+
+Marble is built as a Turborepo monorepo with three main applications:
+
+<CardGroup cols={3}>
+  <Card title="API" icon="server">
+    Hono REST API deployed to Cloudflare Workers for global edge distribution.
+  </Card>
+  <Card title="CMS" icon="browser">
+    Next.js 16 dashboard deployed to Vercel with React 19.
+  </Card>
+  <Card title="Web" icon="globe">
+    Astro marketing site deployed to Vercel.
+  </Card>
+</CardGroup>
+
+### Technology stack
+
+- **Monorepo** - Turborepo with pnpm workspaces
+- **Database** - Neon serverless PostgreSQL with Prisma ORM
+- **Cache/Rate limiting** - Upstash Redis
+- **Authentication** - Better Auth with Google and GitHub OAuth
+- **File storage** - Cloudflare R2
+- **API framework** - Hono (edge-optimized)
+- **CMS framework** - Next.js 16 with App Router
+- **Package manager** - pnpm v10.19.0+
+
+## Prerequisites
+
+Before deploying Marble, ensure you have:
+
+<CardGroup cols={2}>
+  <Card title="Node.js 20+" icon="node-js">
+    Required for building and running Marble applications.
+  </Card>
+  <Card title="pnpm 10.19.0+" icon="package">
+    Package manager used throughout the monorepo.
+  </Card>
+  <Card title="Cloudflare account" icon="cloudflare">
+    For Workers deployment and R2 storage.
+  </Card>
+  <Card title="Vercel account" icon="vercel">
+    For Next.js CMS and Astro site deployment.
+  </Card>
+</CardGroup>
+
+## Required services
+
+Set up these services before deployment:
+
+### Database - Neon PostgreSQL
+
+<Steps>
+  <Step title="Create Neon account">
+    Sign up at [neon.tech](https://neon.tech) for a serverless PostgreSQL database.
+  </Step>
+  
+  <Step title="Create database">
+    Create a new database project and note the connection string.
+  </Step>
+  
+  <Step title="Configure connection">
+    Set `DATABASE_URL` environment variable with your Neon connection string.
+  </Step>
+</Steps>
+
+### Redis - Upstash
+
+<Steps>
+  <Step title="Create Upstash account">
+    Sign up at [upstash.com](https://upstash.com) for serverless Redis.
+  </Step>
+  
+  <Step title="Create database">
+    Create a new Redis database and get the REST URL and token.
+  </Step>
+  
+  <Step title="Configure credentials">
+    Set `REDIS_URL` and `REDIS_TOKEN` environment variables.
+  </Step>
+</Steps>
+
+### Storage - Cloudflare R2
+
+<Steps>
+  <Step title="Create R2 bucket">
+    In your Cloudflare dashboard, create a new R2 bucket for media storage.
+  </Step>
+  
+  <Step title="Generate API token">
+    Create an API token with R2 read/write permissions.
+  </Step>
+  
+  <Step title="Configure R2 credentials">
+    Set environment variables:
+    - `CLOUDFLARE_ACCESS_KEY_ID`
+    - `CLOUDFLARE_SECRET_ACCESS_KEY`
+    - `CLOUDFLARE_BUCKET_NAME`
+    - `CLOUDFLARE_S3_ENDPOINT`
+    - `CLOUDFLARE_PUBLIC_URL`
+  </Step>
+</Steps>
+
+### Authentication - Better Auth
+
+<Steps>
+  <Step title="Generate auth secret">
+    Run `openssl rand -base64 32` to generate a secure secret.
+  </Step>
+  
+  <Step title="Configure Better Auth">
+    Set environment variables:
+    - `BETTER_AUTH_SECRET` - Your generated secret
+    - `BETTER_AUTH_URL` - Your CMS URL (e.g., https://cms.yourdomain.com)
+  </Step>
+  
+  <Step title="Set up OAuth providers">
+    Create OAuth apps for Google and GitHub, then set:
+    - `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
+    - `GITHUB_ID` and `GITHUB_SECRET`
+  </Step>
+</Steps>
+
+## Environment variables
+
+Marble requires several environment variables across applications.
+
+### API (.dev.vars for local, Cloudflare dashboard for production)
+
+```bash
+DATABASE_URL=postgresql://...
+REDIS_URL=https://...
+REDIS_TOKEN=...
+RESEND_API_KEY=re_...
+POLAR_ACCESS_TOKEN=polar_...
+SYSTEM_SECRET=shared-secret-with-cms
+ENVIRONMENT=production
+```
+
+### CMS (.env.local)
+
+```bash
+DATABASE_URL=postgresql://...
+REDIS_URL=https://...
+REDIS_TOKEN=...
+
+BETTER_AUTH_URL=https://cms.yourdomain.com
+BETTER_AUTH_SECRET=your-32-char-secret
+
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GITHUB_ID=...
+GITHUB_SECRET=...
+
+CLOUDFLARE_ACCESS_KEY_ID=...
+CLOUDFLARE_SECRET_ACCESS_KEY=...
+CLOUDFLARE_BUCKET_NAME=marble-media
+CLOUDFLARE_S3_ENDPOINT=https://....r2.cloudflarestorage.com
+CLOUDFLARE_PUBLIC_URL=https://media.yourdomain.com
+
+RESEND_API_KEY=re_...
+POLAR_ACCESS_TOKEN=polar_...
+SYSTEM_SECRET=same-as-api
+
+QSTASH_TOKEN=...
+MARBLE_API_KEY=your-api-key
+MARBLE_API_URL=https://api.yourdomain.com
+```
+
+### Web (.env)
+
+```bash
+PUBLIC_API_URL=https://api.yourdomain.com
+```
+
+<Warning>
+  Never commit `.env` files to version control. Use `.env.example` as a template and keep actual credentials secure.
+</Warning>
+
+## Building the monorepo
+
+Marble uses Turborepo for efficient builds:
+
+```bash
+# Install dependencies
+pnpm install
+
+# Generate Prisma client (required before build)
+pnpm db:generate
+
+# Build all applications
+pnpm build
+
+# Build specific app
+pnpm --filter api build
+pnpm --filter cms build
+pnpm --filter web build
+```
+
+### Build outputs
+
+- **API** - `apps/api/dist/` (bundled worker)
+- **CMS** - `apps/cms/.next/` (Next.js build)
+- **Web** - `apps/web/dist/` (static Astro site)
+
+## Database setup
+
+Initialize the database with Prisma:
+
+<Steps>
+  <Step title="Run migrations">
+    ```bash
+    pnpm db:deploy
+    ```
+    This applies all migrations to your production database.
+  </Step>
+  
+  <Step title="Verify schema">
+    ```bash
+    pnpm db:studio
+    ```
+    Opens Prisma Studio to inspect your database.
+  </Step>
+</Steps>
+
+### Database schema
+
+The Prisma schema (`packages/db/prisma/schema.prisma`) includes:
+
+- Organizations (workspaces)
+- Posts, authors, categories, tags
+- Media files
+- Webhooks
+- API keys
+- Users, sessions, accounts (Better Auth)
+- Subscriptions (Polar.sh)
+- Usage events (analytics)
+
+<Note>
+  Marble uses Prisma's driver adapters with the Neon serverless driver for edge compatibility.
+</Note>
+
+## Deploying the API
+
+Deploy the Hono API to Cloudflare Workers:
+
+<Steps>
+  <Step title="Install Wrangler">
+    ```bash
+    pnpm add -g wrangler
+    ```
+  </Step>
+  
+  <Step title="Authenticate">
+    ```bash
+    wrangler login
+    ```
+  </Step>
+  
+  <Step title="Configure secrets">
+    Set environment variables in Cloudflare dashboard or using:
+    ```bash
+    wrangler secret put DATABASE_URL
+    wrangler secret put REDIS_URL
+    wrangler secret put REDIS_TOKEN
+    # ... and other secrets
+    ```
+  </Step>
+  
+  <Step title="Deploy">
+    ```bash
+    cd apps/api
+    pnpm deploy
+    ```
+    This runs `wrangler deploy --minify` to deploy to Cloudflare Workers.
+  </Step>
+</Steps>
+
+### API deployment script
+
+The `apps/api/package.json` includes:
+
+```json
+{
+  "scripts": {
+    "dev": "dotenv -e .dev.vars -- wrangler dev",
+    "deploy": "wrangler deploy --minify"
+  }
+}
+```
+
+## Deploying the CMS
+
+Deploy the Next.js CMS to Vercel:
+
+<Steps>
+  <Step title="Install Vercel CLI">
+    ```bash
+    pnpm add -g vercel
+    ```
+  </Step>
+  
+  <Step title="Link project">
+    ```bash
+    cd apps/cms
+    vercel link
+    ```
+  </Step>
+  
+  <Step title="Configure environment">
+    In the Vercel dashboard, add all required environment variables from the CMS section above.
+  </Step>
+  
+  <Step title="Deploy">
+    ```bash
+    vercel --prod
+    ```
+  </Step>
+</Steps>
+
+### CMS deployment configuration
+
+The CMS uses Next.js 16 with:
+
+- App Router (React 19)
+- React Server Components
+- Server Actions for mutations
+- Middleware for authentication
+
+## Deploying the website
+
+Deploy the Astro marketing site to Vercel:
+
+<Steps>
+  <Step title="Link project">
+    ```bash
+    cd apps/web
+    vercel link
+    ```
+  </Step>
+  
+  <Step title="Deploy">
+    ```bash
+    vercel --prod
+    ```
+  </Step>
+</Steps>
+
+## Optional services
+
+These services enhance Marble but aren't required:
+
+### Polar.sh (payments)
+
+For subscription billing:
+
+1. Create a Polar account at [polar.sh](https://polar.sh)
+2. Create products for Hobby and Pro plans
+3. Set environment variables:
+   - `POLAR_ACCESS_TOKEN`
+   - `POLAR_WEBHOOK_SECRET`
+   - `POLAR_HOBBY_PRODUCT_ID`
+   - `POLAR_PRO_PRODUCT_ID`
+
+### QStash (webhook delivery)
+
+For reliable webhook delivery:
+
+1. Create an Upstash QStash account
+2. Get your QStash token
+3. Set `QSTASH_TOKEN` environment variable
+
+### Resend (emails)
+
+For transactional emails:
+
+1. Create a Resend account at [resend.com](https://resend.com)
+2. Verify your sending domain
+3. Set `RESEND_API_KEY` environment variable
+
+## Development workflow
+
+### Local development
+
+Run all apps in development mode:
+
+```bash
+# Start all apps
+pnpm dev
+
+# Start individual apps
+pnpm api:dev    # API on localhost:8787
+pnpm cms:dev    # CMS on localhost:3000
+pnpm web:dev    # Web on localhost:4321
+```
+
+### Docker for local database
+
+Use Docker Compose for local PostgreSQL:
+
+```bash
+# Start Postgres
+pnpm docker:up
+
+# View logs
+pnpm docker:logs
+
+# Stop containers
+pnpm docker:down
+
+# Clean (destroys data)
+pnpm docker:clean
+```
+
+### Code quality
+
+Marble uses Ultracite (Biome-based linter):
+
+```bash
+# Check for issues
+pnpm lint
+
+# Auto-fix issues
+pnpm format
+```
+
+### Git hooks
+
+Husky runs:
+
+- `commitlint` on commit messages (conventional commits required)
+- Pre-commit hooks for linting
+
+## Monitoring and maintenance
+
+### Database migrations
+
+When the schema changes:
+
+```bash
+# Create migration (development)
+pnpm db:migrate
+
+# Apply migrations (production)
+pnpm db:deploy
+```
+
+### Scaling considerations
+
+- **API** - Cloudflare Workers auto-scale globally
+- **CMS** - Vercel auto-scales with your traffic
+- **Database** - Neon auto-scales with autosuspend
+- **Redis** - Upstash provides auto-scaling
+
+### Backup strategy
+
+- **Database** - Neon provides automatic backups
+- **Media files** - R2 has built-in durability
+- **Export data** - Use Prisma Studio or SQL exports
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Prisma client errors">
+    Run `pnpm db:generate` after any schema changes. The Prisma client must be regenerated for the build to succeed.
+  </Accordion>
+  
+  <Accordion title="Type errors after schema change">
+    Run `pnpm build` to regenerate all types. Turborepo will build packages in the correct dependency order.
+  </Accordion>
+  
+  <Accordion title="Docker database not starting">
+    Check if port 5432 is already in use. Run `pnpm docker:clean` to remove old containers and volumes.
+  </Accordion>
+  
+  <Accordion title="API auth failures">
+    Verify `SYSTEM_SECRET` matches between the API and CMS deployments. This shared secret is used for internal API calls.
+  </Accordion>
+  
+  <Accordion title="Webhook delivery failures">
+    Ensure `QSTASH_TOKEN` is set. Without QStash, webhooks are sent directly without retry logic.
+  </Accordion>
+</AccordionGroup>
+
+## Security best practices
+
+<Card title="Environment variables" icon="shield">
+  Never commit `.env` files. Use environment variable management tools for production credentials.
+</Card>
+
+<Card title="API secrets" icon="key">
+  Rotate `BETTER_AUTH_SECRET` and `SYSTEM_SECRET` regularly. Store them in a secrets manager.
+</Card>
+
+<Card title="Database access" icon="database">
+  Restrict database access to your API and CMS. Use Neon's IP allowlist for additional security.
+</Card>
+
+<Card title="OAuth credentials" icon="lock">
+  Secure your OAuth client secrets. Rotate them if compromised.
+</Card>
+
+## Next steps
+
+After deploying Marble:
+
+1. Create your first workspace through the CMS
+2. Generate API keys for your applications
+3. Set up webhooks for external integrations
+4. Configure custom domains for your deployments
+5. Set up monitoring and alerting

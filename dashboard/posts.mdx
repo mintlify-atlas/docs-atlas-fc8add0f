@@ -1,0 +1,365 @@
+---
+title: Posts
+description: Creating, editing, and publishing posts; draft vs published status; featured posts
+---
+
+Posts are the core content type in Marble. Create articles, blog posts, product updates, or changelogs with a powerful editor and flexible organization options.
+
+## Creating a post
+
+<Steps>
+  <Step title="Navigate to posts">
+    Click **Posts** in the sidebar to view your content library.
+  </Step>
+  <Step title="Create new post">
+    Click **New Post** to open the editor.
+  </Step>
+  <Step title="Add title">
+    Enter your post title. The slug will be automatically generated from the title.
+  </Step>
+  <Step title="Write content">
+    Use the rich text editor to write your post. Press `/` to access the slash command menu for inserting blocks.
+  </Step>
+  <Step title="Configure settings">
+    Open the sidebar to set category, tags, authors, SEO description, cover image, and publish date.
+  </Step>
+  <Step title="Save or publish">
+    Choose **Save as draft** to continue later or **Publish** to make it live immediately.
+  </Step>
+</Steps>
+
+## Post editor
+
+The Marble editor is built on Tiptap and supports:
+
+- **Rich text formatting** - Bold, italic, underline, strikethrough, code
+- **Headings** - H1, H2, H3 with automatic table of contents
+- **Lists** - Bullet lists, numbered lists, task lists
+- **Code blocks** - Syntax highlighting for 100+ languages
+- **Tables** - Sortable, resizable tables with row/column controls
+- **Media embeds** - Images, videos, YouTube, Twitter
+- **Markdown support** - Write in markdown or paste markdown content
+
+<Info>
+  Learn more about the editor's features in the [Editor documentation](/dashboard/editor).
+</Info>
+
+## Post metadata
+
+Every post includes essential metadata configured in the editor sidebar:
+
+### Title and slug
+
+- **Title** - Main heading for your post (required)
+- **Slug** - URL-friendly identifier (auto-generated from title, editable)
+
+<Note>
+  The slug must be unique within your workspace. It's used in API responses and share links.
+</Note>
+
+### Description
+
+A brief summary of your post (required). Used for:
+
+- SEO meta descriptions
+- Social media previews
+- API responses
+- RSS feeds
+
+Keep descriptions between 120-160 characters for optimal SEO.
+
+### Category
+
+Assign your post to exactly one category (required). Categories help organize content into broad topics.
+
+Example categories:
+- Product Updates
+- Engineering Blog
+- Company News
+- Tutorials
+
+<Info>
+  Create and manage categories in the [Categories](/dashboard/categories-and-tags#categories) section.
+</Info>
+
+### Tags
+
+Add multiple tags to your post (optional). Tags provide flexible, cross-cutting organization.
+
+Example tags:
+- `react`
+- `typescript`
+- `performance`
+- `tutorial`
+
+### Authors
+
+Assign one or more authors to the post:
+
+- **Primary author** - The main author displayed prominently
+- **Co-authors** - Additional contributors
+
+<Note>
+  Authors must be created in advance. See [Authors](/dashboard/authors) for details.
+</Note>
+
+### Cover image
+
+Upload a cover image to accompany your post (optional). Cover images are used in:
+
+- Post listings
+- Social media previews
+- API responses
+
+Supported formats: JPG, PNG, WebP, GIF
+
+### Published date
+
+Set the publication date and time for your post. This determines:
+
+- When the post appears in listings
+- Sorting order in APIs
+- RSS feed ordering
+
+You can backdate posts or schedule them for future publication.
+
+<Info>
+  Published dates use your workspace timezone configured in Settings > General.
+</Info>
+
+### Attribution
+
+If republishing content from another source, you can add attribution:
+
+- **Original author** - Name of the original author
+- **Original URL** - Link to the original content
+
+Attribution is displayed on the published post and included in API responses.
+
+## Post status
+
+Posts can be in one of two states:
+
+<Tabs>
+  <Tab title="Draft">
+    Unpublished posts that are still being worked on:
+    
+    - Not visible via API
+    - Not included in RSS feeds
+    - Can be shared via private share links
+    - Editable by all team members with access
+    
+    <Note>
+      Drafts are perfect for collaborative editing before publication.
+    </Note>
+  </Tab>
+  <Tab title="Published">
+    Live posts accessible via the API:
+    
+    - Available through all API endpoints
+    - Included in RSS feeds
+    - Visible in public listings
+    - Can still be edited (updates are immediate)
+    
+    <Info>
+      Publishing a post triggers the `post_published` webhook event if configured.
+    </Info>
+  </Tab>
+</Tabs>
+
+### Changing status
+
+You can change a post's status at any time:
+
+- **Draft to Published** - Makes the post live
+- **Published to Draft** - Hides the post from public view
+
+Status changes are immediate and trigger webhook events.
+
+## Featured posts
+
+Mark important posts as "featured" to highlight them:
+
+<Steps>
+  <Step title="Open post editor">
+    Edit the post you want to feature.
+  </Step>
+  <Step title="Enable featured toggle">
+    In the sidebar, toggle **Featured post** on.
+  </Step>
+  <Step title="Save changes">
+    Click **Update** to save the featured status.
+  </Step>
+</Steps>
+
+Featured posts can be:
+
+- Filtered via API (`?featured=true`)
+- Displayed prominently in your frontend
+- Used for special sections or carousels
+
+<Info>
+  There's no limit to the number of featured posts. Use them to highlight your best content.
+</Info>
+
+## Managing posts
+
+The Posts page displays all your content in a sortable table:
+
+### Filtering
+
+Filter posts by:
+
+- **Status** - Draft or Published
+- **Category** - Filter by category
+- **Featured** - Show only featured posts
+- **Search** - Search by title or description
+
+### Sorting
+
+Sort posts by:
+
+- **Created date** - Newest or oldest first
+- **Published date** - Latest or earliest publication
+- **Title** - Alphabetically
+- **Views** - Most or least viewed
+
+### Bulk actions
+
+Select multiple posts to:
+
+- Change status (publish/unpublish)
+- Delete permanently
+- Export as markdown
+
+## Editing posts
+
+<Steps>
+  <Step title="Find the post">
+    Locate the post in the Posts list.
+  </Step>
+  <Step title="Click to edit">
+    Click the post title or the edit icon to open the editor.
+  </Step>
+  <Step title="Make changes">
+    Update content, metadata, or settings as needed.
+  </Step>
+  <Step title="Save updates">
+    Click **Update** to save changes.
+  </Step>
+</Steps>
+
+<Warning>
+  Updates to published posts are immediate and reflected in the API instantly. Consider using drafts for major revisions.
+</Warning>
+
+## Deleting posts
+
+<Warning>
+  Deleting a post is permanent and cannot be undone. The post will be removed from the API and all media references will be lost.
+</Warning>
+
+<Steps>
+  <Step title="Select post">
+    Find the post you want to delete.
+  </Step>
+  <Step title="Click delete">
+    Click the menu icon (⋯) and select **Delete**.
+  </Step>
+  <Step title="Confirm deletion">
+    Confirm the action. The post will be permanently deleted.
+  </Step>
+</Steps>
+
+Deleting a post triggers the `post_deleted` webhook event if configured.
+
+## Share links
+
+Share draft posts with others before publishing:
+
+<Steps>
+  <Step title="Open post editor">
+    Edit the draft post you want to share.
+  </Step>
+  <Step title="Create share link">
+    In the sidebar, click **Create share link**.
+  </Step>
+  <Step title="Configure link">
+    Set an expiration date and optional password.
+  </Step>
+  <Step title="Copy and share">
+    Copy the link and share it with reviewers.
+  </Step>
+</Steps>
+
+Share links:
+
+- Expire after a set date (max 30 days)
+- Can be password protected
+- Show a read-only preview of the post
+- Can be revoked at any time
+
+<Info>
+  Share links are perfect for getting feedback from clients or stakeholders before publishing.
+</Info>
+
+## Importing posts
+
+Import existing markdown content into Marble:
+
+<Steps>
+  <Step title="Navigate to posts">
+    Go to the Posts page.
+  </Step>
+  <Step title="Click upload icon">
+    Click the upload icon in the toolbar.
+  </Step>
+  <Step title="Select markdown files">
+    Choose one or more `.md` files to import.
+  </Step>
+  <Step title="Review and import">
+    Review the parsed content and click **Import**.
+  </Step>
+</Steps>
+
+The importer:
+
+- Parses markdown to HTML and Tiptap JSON
+- Extracts frontmatter for metadata
+- Creates drafts by default
+- Handles multiple files in batch
+
+## Exporting posts
+
+Export posts as markdown for backup or migration:
+
+<Steps>
+  <Step title="Select posts">
+    Choose one or more posts to export.
+  </Step>
+  <Step title="Click export">
+    Click **Export as markdown**.
+  </Step>
+  <Step title="Download files">
+    A ZIP file containing markdown files will be downloaded.
+  </Step>
+</Steps>
+
+Exported markdown includes:
+
+- Frontmatter with all metadata
+- Markdown-formatted content
+- Relative links preserved
+
+## Post views
+
+Marble tracks view counts for published posts. View metrics are:
+
+- Incremented on each API request for the post
+- Visible in the Posts table
+- Available via API
+- Not tracked for draft posts
+
+<Note>
+  View counts are eventually consistent and may not update immediately.
+</Note>
